@@ -6,7 +6,7 @@ import { notifyError, notifySuccess } from "@/utils/toast";
 
 const useSliderSubmit = () => {
   const [img, setImg] = useState<string>("");
-  const [status, setStatus] = useState<string>("active");
+  const [status, setStatus] = useState<"active" | "inactive">("active");
   const [bgType, setBgType] = useState<string>("green_bg");
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
   const router = useRouter();
@@ -28,7 +28,7 @@ const useSliderSubmit = () => {
         subtitle_text_1: data.subtitle_text_1 || "",
         subtitle_percent: Number(data.subtitle_percent) || 0,
         subtitle_text_2: data.subtitle_text_2 || "",
-        bg_type: bgType,
+        bg_type: data.bg_type as "green_bg" | "light" | "default",
         status,
         order: Number(data.order) || 0,
       };
@@ -57,7 +57,7 @@ const useSliderSubmit = () => {
         subtitle_text_1: data.subtitle_text_1,
         subtitle_percent: Number(data.subtitle_percent),
         subtitle_text_2: data.subtitle_text_2,
-        bg_type: bgType,
+        bg_type: data.bg_type as "green_bg" | "light" | "default",
         status,
         order: Number(data.order),
       };

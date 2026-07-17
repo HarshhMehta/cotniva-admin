@@ -6,6 +6,7 @@ import { useGetAllSlidersQuery, useDeleteSliderMutation } from "@/redux/slider/s
 import usePagination from "@/hooks/use-pagination";
 import { notifyError, notifySuccess } from "@/utils/toast";
 import Link from "next/link";
+import Image from "next/image";
 
 const SliderTable = () => {
   const { data: sliders, isError, isLoading } = useGetAllSlidersQuery();
@@ -48,12 +49,14 @@ const SliderTable = () => {
                 <td className="px-3 py-3 align-middle">
                   {/* wide banner preview */}
                   <div style={{ width: 200, height: 75, overflow: "hidden", borderRadius: 6, background: "#f3f4f6" }}>
-                    <img
-                      src={item.img}
-                      alt="slider"
-                      style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top" }}
-                    />
-                  </div>
+  <Image
+    src={item.img}
+    alt="slider"
+    width={200}
+    height={75}
+    style={{ objectFit: "cover", objectPosition: "center top" }}
+  />
+</div>
                 </td>
                 <td className="px-3 py-3 text-[#55585B] text-sm align-middle">{item.link || "/shop"}</td>
                 <td className="px-3 py-3 align-middle">

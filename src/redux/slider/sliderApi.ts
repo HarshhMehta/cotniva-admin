@@ -4,6 +4,7 @@ export interface ISlider {
   _id?: string;
   img: string;
   title: string;
+  link?: string;
   pre_title_text?: string;
   pre_title_price?: number;
   subtitle_text_1?: string;

@@ -78,7 +78,8 @@ export default function EditSliderPage() {
             </div>
             <div className="mb-6">
               <label className="mb-1 block text-sm font-medium text-heading">Status</label>
-              <select defaultValue={slider?.status} onChange={(e) => setStatus(e.target.value)} className="w-full border border-gray-300 rounded px-3 py-2 text-sm">
+              <select defaultValue={slider?.status} onChange={(e) => setStatus(e.target.value as "active" | "inactive")} className="w-full border border-gray-300 rounded px-3 py-2 text-sm">
+
                 <option value="active">Active</option>
                 <option value="inactive">Inactive</option>
               </select>
