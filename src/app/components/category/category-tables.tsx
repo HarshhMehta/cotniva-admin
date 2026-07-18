@@ -44,9 +44,6 @@ const CategoryTables = () => {
                     Name
                   </th>
                   <th scope="col" className="px-3 py-3 text-tiny text-text2 uppercase font-semibold w-[150px] text-end">
-                    Product type
-                  </th>
-                  <th scope="col" className="px-3 py-3 text-tiny text-text2 uppercase font-semibold w-[150px] text-end">
                     Items
                   </th>
                   <th scope="col" className="px-9 py-3 text-tiny text-text2 uppercase  font-semibold w-[12%] text-end">
@@ -65,9 +62,6 @@ const CategoryTables = () => {
                         {item.img && <Image className="w-10 h-10 rounded-full shrink shrink-0 object-cover" src={item.img} alt="image" width={40} height={40} />}
                         <span className="font-medium text-heading text-hover-primary transition">{item.parent}</span>
                       </a>
-                    </td>
-                    <td className="px-3 py-3 font-normal text-[#55585B] text-end">
-                      /{item.productType}
                     </td>
                     <td className="px-3 py-3 font-normal text-[#55585B] text-end">
                       {item.products?.length}

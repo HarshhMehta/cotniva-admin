@@ -24,6 +24,7 @@ export async function POST(request: NextRequest) {
     const description = formData.get("description") as string;
     const videoId = formData.get("videoId") as string;
     const featured = formData.get("featured") === "true";
+    const newArrival = formData.get("newArrival") === "true";
 
     // Extract nested objects (sent as JSON strings)
     const brand = JSON.parse(formData.get("brand") as string);
@@ -35,7 +36,7 @@ export async function POST(request: NextRequest) {
     );
 
     // Validate required fields
-    if (!title || !unit || !price || !quantity || !parent || !children || !productType || !description) {
+    if (!title || !unit || !price || !quantity || !parent || !description) {
       return NextResponse.json(
         { success: false, message: "Missing required fields" },
         { status: 400 }
@@ -78,12 +79,7 @@ export async function POST(request: NextRequest) {
         }
 
         return {
-          color: {
-            name: variant.color || "",
-            clrCode: variant.colorCode || "",
-          },
           img: imageUrl,
-          sizes: variant.size ? variant.size.split(",").map((s: string) => s.trim()) : [],
           isDefault: variant.isDefault || false,
         };
       })
@@ -95,6 +91,8 @@ export async function POST(request: NextRequest) {
       imageURLs[0].isDefault = true;
     }
 
+    const sizes = JSON.parse(formData.get("sizes") as string || "[]");
+
     // Prepare product payload for external server
     const productPayload = {
       sku: sku || "",
@@ -103,29 +101,31 @@ export async function POST(request: NextRequest) {
       unit,
       imageURLs,
       parent,
-      children,
+      children: children || "",
       price: Number(price),
       discount: Number(discount) || 0,
       quantity: Number(quantity),
       brand: {
-        name: brand.name,
-        id: brand.id,
+        name: brand?.name || "",
+        id: brand?.id || null,
       },
       category: {
         name: category.name,
         id: category.id,
       },
       status: status || "in-stock",
-      productType: productType.toLowerCase(),
+      productType: (productType || "general").toLowerCase(),
       description,
       videoId: videoId || "",
       additionalInformation,
       tags,
+      sizes,
       offerDate: {
         startDate: offerDate?.startDate || null,
         endDate: offerDate?.endDate || null,
       },
       featured,
+      newArrival,
     };
 
     // console.log(productPayload,'productPayload');

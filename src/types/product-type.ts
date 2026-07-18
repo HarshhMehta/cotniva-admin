@@ -161,4 +161,5 @@ export interface ProductFormData {
   offerEndDate?: string | Date;
   featured: boolean;
   newArrival?: boolean;
+  homeVisibility?: "" | "new_arrival";
 }

@@ -7,8 +7,6 @@ import { useForm, SubmitHandler } from "react-hook-form";
 import VariantModal from "./variant-product-modal";
 import Breadcrumb from "../../breadcrumb/breadcrumb";
 import ProductCategory from "../../category/product-category";
-import BrandSelect from "./product-type-brand";
-import ProductTypeSelect from "./product-type";
 import { notifyError, notifySuccess } from "@/utils/toast";
 import { useRouter } from "next/navigation";
 import { formatDateForInput } from "@/utils/utils";
@@ -58,6 +56,7 @@ export default function ProductForm({ productEdit }: IProps) {
       offerStartDate: "",
       offerEndDate: "",
       featured: false,
+      homeVisibility: "",
     },
   });
   
@@ -65,35 +64,36 @@ export default function ProductForm({ productEdit }: IProps) {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [variantError, setVariantError] = useState<string>("");
   const [additionalInfo, setAdditionalInfo] = useState<AdditionalInfo[]>([]);
+  const [productSizes, setProductSizes] = useState<string[]>([]);
+
+  const SIZE_OPTIONS = ["XS", "S", "M", "L", "XL", "XXL"];
+
+  const toggleSize = (size: string) => {
+    setProductSizes((prev) =>
+      prev.includes(size) ? prev.filter((s) => s !== size) : [...prev, size]
+    );
+  };
 
   const handleAddVariant = () => {
     setIsModalOpen(true);
   };
 
   const handleSaveVariant = (variantData: Variant) => {
-    // validation
-    if (!variantData.color?.trim()) {
-      setVariantError("Variant color is required");
-      return;
-    }
     if (!variantData.img) {
-      setVariantError("Variant image is required");
+      setVariantError("Gallery image is required");
       return;
     }
 
     let newVariants = [...variants];
 
-    // CASE 1: No variants yet → make this one default automatically
     if (newVariants.length === 0) {
       variantData.isDefault = true;
     }
 
-    // CASE 2: User selected "isDefault" manually → clear defaults
     if (variantData.isDefault) {
       newVariants = newVariants.map(v => ({ ...v, isDefault: false }));
     }
 
-    // push new variant
     newVariants.push(variantData);
 
     setVariants(newVariants);
@@ -152,19 +152,28 @@ export default function ProductForm({ productEdit }: IProps) {
       offerStartDate: formatDateForInput (productEdit.offerDate?.startDate),
       offerEndDate: formatDateForInput(productEdit.offerDate?.endDate),
       featured: !!productEdit.featured,
+      homeVisibility: productEdit.newArrival ? "new_arrival" : "",
     });
 
     if (Array.isArray(productEdit.imageURLs)) {
       const v = productEdit.imageURLs.map((imgObj: any) => ({
-        color: imgObj.color?.name ?? "",
+        color: "",
         img: imgObj.img ?? "",
-        size: (imgObj.sizes ?? []).join(","),
+        size: "",
         isDefault: !!imgObj.isDefault,
       }));
       setVariants(v);
     } else {
       setVariants([]);
     }
+
+    setProductSizes(
+      Array.isArray(productEdit.sizes)
+        ? productEdit.sizes
+        : typeof productEdit.sizes === "string" && productEdit.sizes
+          ? productEdit.sizes.split(",").map((s: string) => s.trim()).filter(Boolean)
+          : []
+    );
 
     setAdditionalInfo(productEdit.additionalInformation ?? []);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -177,21 +186,14 @@ export default function ProductForm({ productEdit }: IProps) {
     children: productEdit?.children || "",
   }), [productEdit]);
 
-  const brandDefaultValue = useMemo(() => ({
-    id: productEdit?.brand?.id || "",
-    name: productEdit?.brand?.name || "",
-  }), [productEdit]);
-
-  const productTypeDefaultValue = useMemo(() => productEdit?.productType || "", [productEdit]);
-
   const onSubmit: SubmitHandler<ProductFormData> = async (data) => {
     // Validate variants
     if (variants.length === 0) {
-      notifyError("At least one product variant is required");
+      notifyError("At least one gallery image is required");
       return;
     }
-    if(!data.parent || !data.children) {
-      notifyError("Please select a valid category");
+    if (!data.parent || !data.category?.id) {
+      notifyError("Please select a category");
       return;
     }
  
@@ -211,17 +213,17 @@ export default function ProductForm({ productEdit }: IProps) {
       formData.append("discount", (data.discount_percentage || 0).toString());
       formData.append("quantity", data.quantity.toString());
       formData.append("parent", data.parent);
-      formData.append("children", data.children);
+      formData.append("children", "");
       formData.append("status", data.status);
-      formData.append("productType", (data.productType || "").toLowerCase());
-      formData.append("newArrival", data.newArrival ? "true" : "false");
+      formData.append("productType", "general");
+      formData.append("newArrival", data.homeVisibility === "new_arrival" ? "true" : "false");
       formData.append("description", data.description);
       formData.append("videoId", data.youtube_video_Id || "");
       formData.append("featured", data.featured ? "true" : "false");
 
       formData.append("brand", JSON.stringify({
-        name: data.brand?.name || null,
-        id: data.brand?.id || null,  // "" ki jagah null
+        name: "",
+        id: null,
       }));
 
       formData.append("category", JSON.stringify({
@@ -243,13 +245,14 @@ export default function ProductForm({ productEdit }: IProps) {
       formData.append("additionalInformation", JSON.stringify(additionalInformation));
 
       const variantsData = variants.map((v) => ({
-        color: v.color,
+        color: "",
         colorCode: "",
-        size: v.size || "",
+        size: "",
         isDefault: v.isDefault || false,
         img: typeof v.img === "string" ? v.img : "",
       }));
       formData.append("variants", JSON.stringify(variantsData));
+      formData.append("sizes", JSON.stringify(productSizes));
 
       if (productEdit && productEdit._id) {
         const oldImages = (productEdit.imageURLs || []).map((img: any) => img.img);
@@ -416,19 +419,6 @@ export default function ProductForm({ productEdit }: IProps) {
               setValue={setValue}
               default_value={categoryDefaultValue}
               parentErr={errors.parent?.message}
-              childrenErr={errors.children?.message}
-            />
-
-            <BrandSelect
-              register={register}
-              setValue={setValue}
-              default_value={brandDefaultValue}
-            />
-
-            <ProductTypeSelect
-              register={register}
-              setValue={setValue}
-              default_value={productTypeDefaultValue}
             />
 
             <div>
@@ -477,11 +467,11 @@ export default function ProductForm({ productEdit }: IProps) {
             </div>
           </div>
 
-          {/* Product Variants Section */}
+          {/* Product Gallery */}
           <div className="border border-gray2 rounded-lg p-4 mb-4">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold">
-                Product Variants <span className="text-red">*</span>
+                Product Gallery <span className="text-red">*</span>
               </h3>
               <button
                 type="button"
@@ -490,7 +480,7 @@ export default function ProductForm({ productEdit }: IProps) {
                 disabled={isSubmitting}
               >
                 <span className="text-lg">+</span>
-                Add item
+                Add image
               </button>
             </div>
 
@@ -507,13 +497,7 @@ export default function ProductForm({ productEdit }: IProps) {
                         Thumbnail
                       </th>
                       <th className="text-left py-3 px-4 font-medium text-gray-600">
-                        Color
-                      </th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-600">
-                        Size
-                      </th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-600">
-                        Is Default
+                        Default
                       </th>
                       <th className="text-left py-3 px-4 font-medium text-gray-600">
                         Action
@@ -530,15 +514,9 @@ export default function ProductForm({ productEdit }: IProps) {
                                 ? variant.img
                                 : URL.createObjectURL(variant.img)
                             }
-                            alt="Variant"
+                            alt="Gallery"
                             className="w-12 h-12 object-cover rounded"
                           />
-                        </td>
-                        <td className="py-3 px-4 text-gray-700">
-                          <div>{variant.color}</div>
-                        </td>
-                        <td className="py-3 px-4 text-gray-700">
-                          {variant.size || "-"}
                         </td>
                         <td className="py-3 px-4">
                           {variant.isDefault && (
@@ -573,6 +551,35 @@ export default function ProductForm({ productEdit }: IProps) {
                 </table>
               </div>
             )}
+          </div>
+
+          {/* Product Sizes */}
+          <div className="border border-gray2 rounded-lg p-4 mb-4">
+            <h3 className="text-lg font-semibold text-gray-800 mb-3">Sizes</h3>
+            <p className="text-sm text-gray-500 mb-3">
+              Select available sizes for this product (shown on product page).
+            </p>
+            <div className="flex flex-wrap gap-3">
+              {SIZE_OPTIONS.map((size) => (
+                <label
+                  key={size}
+                  className={`cursor-pointer px-4 py-2 border rounded-md text-sm font-medium transition-colors ${
+                    productSizes.includes(size)
+                      ? "border-blue-600 bg-blue-50 text-blue-700"
+                      : "border-gray6 text-gray-700 hover:border-blue-400"
+                  }`}
+                >
+                  <input
+                    type="checkbox"
+                    className="sr-only"
+                    checked={productSizes.includes(size)}
+                    onChange={() => toggleSize(size)}
+                    disabled={isSubmitting}
+                  />
+                  {size}
+                </label>
+              ))}
+            </div>
           </div>
 
           {/* Description */}
@@ -680,6 +687,24 @@ export default function ProductForm({ productEdit }: IProps) {
             <label htmlFor="featured" className="">
               Featured Product
             </label>
+          </div>
+
+          {/* Visible on Home */}
+          <div>
+            <label className="block font-medium text-gray-700 mb-1.5">
+              Visible on Home
+            </label>
+            <select
+              {...register("homeVisibility")}
+              className="w-full h-[44px] rounded-md border border-gray6 px-4 text-base focus:border-blue-500 bg-white"
+              disabled={isSubmitting}
+            >
+              <option value="">— None —</option>
+              <option value="new_arrival">New Arrival</option>
+            </select>
+            <p className="text-sm text-gray-500 mt-1">
+              Products set as New Arrival will show automatically in the homepage New Arrivals section.
+            </p>
           </div>
 
           {/* Submit Button */}

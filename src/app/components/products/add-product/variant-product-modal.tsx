@@ -8,30 +8,26 @@ interface VariantModalProps {
   onSave: (variant: Variant) => void;
   editData?: Variant | null;
 }
-// Variant Modal Component
+
+/** Gallery image modal — image + default only (no color) */
 export default function VariantModal({ isOpen, onClose, onSave, editData = null }: VariantModalProps) {
   const [thumbnail, setThumbnail] = useState(editData?.img ? [editData.img] : null);
-  const [color, setColor] = useState(editData?.color || "");
-  const [size, setSize] = useState(editData?.size || "");
   const [isDefault, setIsDefault] = useState(editData?.isDefault || false);
 
   const handleSave = () => {
-    if (!thumbnail || !color) {
-      alert("Please select thumbnail and enter color");
+    if (!thumbnail) {
+      alert("Please select a gallery image");
       return;
     }
 
     onSave({
       img: thumbnail[0],
-      color,
-      size,
+      color: "",
+      size: "",
       isDefault,
     });
 
-    // Reset
     setThumbnail(null);
-    setColor("");
-    setSize("");
     setIsDefault(false);
     onClose();
   };
@@ -48,43 +44,17 @@ export default function VariantModal({ isOpen, onClose, onSave, editData = null 
           ✕
         </button>
 
-        <h2 className="text-xl font-semibold mb-4 text-gray-800">Product Variants</h2>
+        <h2 className="text-xl font-semibold mb-4 text-gray-800">Gallery Image</h2>
 
         <div className="space-y-4">
           <div>
             <label className="block font-medium text-gray-600 mb-2">
-              Select Thumbnail (Recommended: 570x510)
+              Select Image (Recommended: 570x510)
             </label>
             <ImageUpload
               images={thumbnail}
               setImages={setThumbnail}
               multiple={false}
-            />
-          </div>
-
-          <div>
-            <label className="block font-medium text-gray-600 mb-2">
-              Color
-            </label>
-            <input
-              type="text"
-              value={color}
-              onChange={(e) => setColor(e.target.value)}
-              placeholder="Enter color name"
-              className="w-full px-4 py-2.5 border border-gray2 rounded-lg focus:outline-none focus:border-blue-500"
-            />
-          </div>
-
-          <div>
-            <label className="block font-medium text-gray-600 mb-2">
-              Size
-            </label>
-            <input
-              type="text"
-              value={size}
-              onChange={(e) => setSize(e.target.value)}
-              placeholder="Enter size"
-              className="w-full px-4 py-2.5 border border-gray2 rounded-lg focus:outline-none focus:border-blue-500"
             />
           </div>
 
@@ -97,7 +67,7 @@ export default function VariantModal({ isOpen, onClose, onSave, editData = null 
               className="w-4 h-4 text-blue-600 border-gray2 rounded focus:ring-blue-500"
             />
             <label htmlFor="isDefault" className="text-gray-700">
-              Set as default variant
+              Set as default / main image
             </label>
           </div>
         </div>
@@ -106,7 +76,7 @@ export default function VariantModal({ isOpen, onClose, onSave, editData = null 
           onClick={handleSave}
           className="mt-6 w-full bg-blue-600 text-white py-2.5 rounded-lg hover:bg-blue-700 transition-colors font-medium"
         >
-          Save Changes
+          Save Image
         </button>
       </div>
     </div>

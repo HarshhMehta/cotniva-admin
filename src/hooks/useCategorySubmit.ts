@@ -2,29 +2,16 @@ import { notifySuccess, notifyError } from "@/utils/toast";
 import { useAddCategoryMutation, useEditCategoryMutation } from "@/redux/category/categoryApi";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { useRouter } from 'next/navigation'
+import { useRouter } from "next/navigation";
 
 const useCategorySubmit = () => {
   const [categoryImg, setCategoryImg] = useState<string>("");
-  const [parent, setParent] = useState<string>("");
-  const [description, setDescription] = useState<string>("");
-  const [error, setError] = useState<string>("");
-  const [selectProductType, setSelectProductType] = useState<string>("");
-  const [categoryChildren, setCategoryChildren] = useState<string[]>([]);
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
   const router = useRouter();
-  // add
-  const [
-    addCategory,
-    { data: categoryData, isError, isLoading, error: addCateErr },
-  ] = useAddCategoryMutation();
-  // edit
-  const [
-    editCategory,
-    { data: editCateData, isError: editErr, isLoading: editLoading, error: editCateErr },
-  ] = useEditCategoryMutation();
 
-  // react hook form
+  const [addCategory] = useAddCategoryMutation();
+  const [editCategory] = useEditCategoryMutation();
+
   const {
     register,
     handleSubmit,
@@ -34,19 +21,16 @@ const useCategorySubmit = () => {
     reset,
   } = useForm();
 
-  //handleSubmitCategory
   const handleSubmitCategory = async (data: any) => {
     try {
       const category_data = {
         img: categoryImg,
         parent: data?.parent,
-        description: data?.description,
-        productType: data?.productType?.value,
-        children: categoryChildren,
+        description: data?.description || "",
+        productType: "general",
+        children: [],
       };
-      if(categoryChildren.length === 0){
-        return notifyError("Please add at least one child");
-      }
+
       const res = await addCategory({ ...category_data });
       if ("error" in res) {
         if ("data" in res.error) {
@@ -59,7 +43,6 @@ const useCategorySubmit = () => {
         notifySuccess("Category added successfully");
         setIsSubmitted(true);
         reset();
-        setCategoryChildren([]);
         setCategoryImg("");
       }
     } catch (error) {
@@ -67,18 +50,17 @@ const useCategorySubmit = () => {
       notifyError("Something went wrong");
     }
   };
-  //handle Submit edit Category
+
   const handleSubmitEditCategory = async (data: any, id: string) => {
     try {
       const category_data = {
         img: categoryImg,
         parent: data?.parent,
-        description: data?.description,
-        productType: data?.productType?.value,
-        children: categoryChildren,
+        description: data?.description || "",
+        productType: "general",
+        children: [],
       };
       const res = await editCategory({ id, data: category_data });
-      // console.log(res)
       if ("error" in res) {
         if ("data" in res.error) {
           const errorData = res.error.data as { message?: string };
@@ -88,7 +70,7 @@ const useCategorySubmit = () => {
         }
       } else {
         notifySuccess("Category update successfully");
-        router.push('/category')
+        router.push("/category");
         setIsSubmitted(true);
         reset();
       }
@@ -99,8 +81,6 @@ const useCategorySubmit = () => {
   };
 
   return {
-    selectProductType,
-    setSelectProductType,
     register,
     handleSubmit,
     setValue,
@@ -108,14 +88,7 @@ const useCategorySubmit = () => {
     control,
     categoryImg,
     setCategoryImg,
-    parent,
-    setParent,
-    description,
-    setDescription,
-    categoryChildren,
-    setCategoryChildren,
     handleSubmitCategory,
-    error,
     isSubmitted,
     handleSubmitEditCategory,
   };
