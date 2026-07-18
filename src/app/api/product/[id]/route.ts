@@ -37,6 +37,7 @@ export async function PUT(
     const videoId = formData.get("videoId") as string;
     const featured = formData.get("featured") === "true";
     const newArrival = formData.get("newArrival") === "true";
+    const bestSeller = formData.get("bestSeller") === "true";
 
     // Extract nested objects
     const brand = JSON.parse(formData.get("brand") as string);
@@ -145,6 +146,7 @@ export async function PUT(
       },
       featured,
       newArrival,
+      bestSeller,
     };
 
     // Send to external server

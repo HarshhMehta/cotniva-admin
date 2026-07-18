@@ -56,7 +56,8 @@ export default function ProductForm({ productEdit }: IProps) {
       offerStartDate: "",
       offerEndDate: "",
       featured: false,
-      homeVisibility: "",
+      newArrival: false,
+      bestSeller: false,
     },
   });
   
@@ -152,7 +153,8 @@ export default function ProductForm({ productEdit }: IProps) {
       offerStartDate: formatDateForInput (productEdit.offerDate?.startDate),
       offerEndDate: formatDateForInput(productEdit.offerDate?.endDate),
       featured: !!productEdit.featured,
-      homeVisibility: productEdit.newArrival ? "new_arrival" : "",
+      newArrival: !!productEdit.newArrival,
+      bestSeller: !!productEdit.bestSeller,
     });
 
     if (Array.isArray(productEdit.imageURLs)) {
@@ -216,7 +218,8 @@ export default function ProductForm({ productEdit }: IProps) {
       formData.append("children", "");
       formData.append("status", data.status);
       formData.append("productType", "general");
-      formData.append("newArrival", data.homeVisibility === "new_arrival" ? "true" : "false");
+      formData.append("newArrival", data.newArrival ? "true" : "false");
+      formData.append("bestSeller", data.bestSeller ? "true" : "false");
       formData.append("description", data.description);
       formData.append("videoId", data.youtube_video_Id || "");
       formData.append("featured", data.featured ? "true" : "false");
@@ -691,19 +694,37 @@ export default function ProductForm({ productEdit }: IProps) {
 
           {/* Visible on Home */}
           <div>
-            <label className="block font-medium text-gray-700 mb-1.5">
+            <label className="block font-medium text-gray-700 mb-2">
               Visible on Home
             </label>
-            <select
-              {...register("homeVisibility")}
-              className="w-full h-[44px] rounded-md border border-gray6 px-4 text-base focus:border-blue-500 bg-white"
-              disabled={isSubmitting}
-            >
-              <option value="">— None —</option>
-              <option value="new_arrival">New Arrival</option>
-            </select>
-            <p className="text-sm text-gray-500 mt-1">
-              Products set as New Arrival will show automatically in the homepage New Arrivals section.
+            <div className="flex flex-col gap-3">
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="newArrival"
+                  {...register("newArrival")}
+                  className="w-4 h-4 text-blue-600 border-gray3 rounded focus:ring-blue-500"
+                  disabled={isSubmitting}
+                />
+                <label htmlFor="newArrival" className="text-sm text-gray-700">
+                  New Arrival
+                </label>
+              </div>
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="bestSeller"
+                  {...register("bestSeller")}
+                  className="w-4 h-4 text-blue-600 border-gray3 rounded focus:ring-blue-500"
+                  disabled={isSubmitting}
+                />
+                <label htmlFor="bestSeller" className="text-sm text-gray-700">
+                  Best Seller
+                </label>
+              </div>
+            </div>
+            <p className="text-sm text-gray-500 mt-2">
+              You can select both. When orders start coming, Best Sellers will switch to automatic ranking.
             </p>
           </div>
 

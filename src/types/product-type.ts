@@ -65,6 +65,7 @@ export interface IProduct {
   }
   featured?: boolean;
   newArrival?: boolean;
+  bestSeller?: boolean;
   sellCount?: number;
   sizes?: string[];
   tags?: string[];
@@ -161,5 +162,5 @@ export interface ProductFormData {
   offerEndDate?: string | Date;
   featured: boolean;
   newArrival?: boolean;
-  homeVisibility?: "" | "new_arrival";
+  bestSeller?: boolean;
 }

@@ -25,6 +25,7 @@ export async function POST(request: NextRequest) {
     const videoId = formData.get("videoId") as string;
     const featured = formData.get("featured") === "true";
     const newArrival = formData.get("newArrival") === "true";
+    const bestSeller = formData.get("bestSeller") === "true";
 
     // Extract nested objects (sent as JSON strings)
     const brand = JSON.parse(formData.get("brand") as string);
@@ -126,6 +127,7 @@ export async function POST(request: NextRequest) {
       },
       featured,
       newArrival,
+      bestSeller,
     };
 
     // console.log(productPayload,'productPayload');
