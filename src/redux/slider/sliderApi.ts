@@ -3,6 +3,7 @@ import { apiSlice } from "../api/apiSlice";
 export interface ISlider {
   _id?: string;
   img: string;
+  mobileImg?: string;
   title: string;
   link?: string;
   pre_title_text?: string;

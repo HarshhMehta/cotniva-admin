@@ -12,12 +12,13 @@ export default function EditSliderPage() {
   const { data: slider, isLoading } = useGetSliderQuery(id);
   const {
     register, handleSubmit, errors,
-    setImg, img, setBgType, bgType, setStatus,
+    setImg, img, setMobileImg, mobileImg, setBgType, bgType, setStatus,
     handleSubmitEditSlider, isSubmitted, setIsSubmitted,
   } = useSliderSubmit();
 
   useEffect(() => {
     if (slider?.img) setImg(slider.img);
+    if (slider?.mobileImg) setMobileImg(slider.mobileImg);
     if (slider?.bg_type) setBgType(slider.bg_type);
     if (slider?.status) setStatus(slider.status);
   }, [slider]);
@@ -31,14 +32,34 @@ export default function EditSliderPage() {
         <div className="max-w-xl bg-white px-8 py-8 rounded-md">
           <h2 className="text-base font-semibold text-heading mb-4">Edit Slider</h2>
           <form onSubmit={handleSubmit((data) => handleSubmitEditSlider(data, id))}>
-            <GlobalImgUpload isSubmitted={isSubmitted} setImage={setImg} image={slider?.img || ""} setIsSubmitted={setIsSubmitted} />
+            <GlobalImgUpload
+              isSubmitted={isSubmitted}
+              setImage={setImg}
+              image={slider?.img || ""}
+              default_img={slider?.img || ""}
+              setIsSubmitted={setIsSubmitted}
+              label="Desktop Image (required)"
+              inputId="edit-slider-desktop-img"
+            />
+
+            <GlobalImgUpload
+              isSubmitted={isSubmitted}
+              setImage={setMobileImg}
+              image={slider?.mobileImg || ""}
+              default_img={slider?.mobileImg || ""}
+              setIsSubmitted={setIsSubmitted}
+              label="Mobile Image (optional — portrait recommended)"
+              inputId="edit-slider-mobile-img"
+            />
+            <p className="text-xs text-gray-500 -mt-4 mb-5">
+              If mobile image is empty, desktop image will be used on phones.
+            </p>
 
             <div className="mb-4">
               <label className="mb-1 block text-sm font-medium text-heading">Title</label>
               <input {...register("title", { required: "Title is required" })} defaultValue={slider?.title} className="w-full border border-gray-300 rounded px-3 py-2 text-sm" />
             </div>
 
-            {/* ✅ Link field */}
             <div className="mb-4">
               <label className="mb-1 block text-sm font-medium text-heading">Button Link</label>
               <input {...register("link")} defaultValue={slider?.link || "/shop"} className="w-full border border-gray-300 rounded px-3 py-2 text-sm" placeholder="/shop" />
@@ -79,7 +100,6 @@ export default function EditSliderPage() {
             <div className="mb-6">
               <label className="mb-1 block text-sm font-medium text-heading">Status</label>
               <select defaultValue={slider?.status} onChange={(e) => setStatus(e.target.value as "active" | "inactive")} className="w-full border border-gray-300 rounded px-3 py-2 text-sm">
-
                 <option value="active">Active</option>
                 <option value="inactive">Inactive</option>
               </select>

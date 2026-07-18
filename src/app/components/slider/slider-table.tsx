@@ -47,16 +47,28 @@ const SliderTable = () => {
                   #{item._id?.slice(2, 10)}
                 </td>
                 <td className="px-3 py-3 align-middle">
-                  {/* wide banner preview */}
-                  <div style={{ width: 200, height: 75, overflow: "hidden", borderRadius: 6, background: "#f3f4f6" }}>
-  <Image
-    src={item.img}
-    alt="slider"
-    width={200}
-    height={75}
-    style={{ objectFit: "cover", objectPosition: "center top" }}
-  />
-</div>
+                  <div className="flex items-center gap-2">
+                    <div style={{ width: 120, height: 50, overflow: "hidden", borderRadius: 6, background: "#f3f4f6" }}>
+                      <Image
+                        src={item.img}
+                        alt="desktop"
+                        width={120}
+                        height={50}
+                        style={{ objectFit: "cover", objectPosition: "center top" }}
+                      />
+                    </div>
+                    {item.mobileImg ? (
+                      <div style={{ width: 40, height: 50, overflow: "hidden", borderRadius: 6, background: "#f3f4f6" }}>
+                        <Image
+                          src={item.mobileImg}
+                          alt="mobile"
+                          width={40}
+                          height={50}
+                          style={{ objectFit: "cover", objectPosition: "center top" }}
+                        />
+                      </div>
+                    ) : null}
+                  </div>
                 </td>
                 <td className="px-3 py-3 text-[#55585B] text-sm align-middle">{item.link || "/shop"}</td>
                 <td className="px-3 py-3 align-middle">

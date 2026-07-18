@@ -12,9 +12,11 @@ type IPropType = {
   default_img?: string;
   image?: string;
   setIsSubmitted?:React.Dispatch<React.SetStateAction<boolean>>
+  label?: string;
+  inputId?: string;
 };
 
-const GlobalImgUpload = ({setImage,isSubmitted,default_img,image,setIsSubmitted}: IPropType) => {
+const GlobalImgUpload = ({setImage,isSubmitted,default_img,image,setIsSubmitted,label="Upload Image",inputId="categoryImage"}: IPropType) => {
   const { handleImageUpload, uploadData, isError, isLoading } = useUploadImage();
   const showDefaultImage = !uploadData && !isLoading && !isError && default_img;
 
@@ -53,7 +55,7 @@ const GlobalImgUpload = ({setImage,isSubmitted,default_img,image,setIsSubmitted}
 
   return (
     <div className="mb-6">
-      <p className="mb-2 text-base text-black">Upload Image</p>
+      <p className="mb-2 text-base text-black">{label}</p>
       <div className="text-center">
         {isSubmitted ? (
           <Image
@@ -74,11 +76,11 @@ const GlobalImgUpload = ({setImage,isSubmitted,default_img,image,setIsSubmitted}
           onChange={handleImageUpload}
           type="file"
           name="image"
-          id="categoryImage"
+          id={inputId}
           className="hidden"
         />
         <label
-          htmlFor="categoryImage"
+          htmlFor={inputId}
           className="text-tiny w-full inline-block py-1 px-4 rounded-md border border-gray6 text-center hover:cursor-pointer hover:bg-theme hover:text-white hover:border-theme transition"
         >
           Upload Image

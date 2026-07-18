@@ -7,7 +7,7 @@ import SliderTable from "./slider-table";
 const AddSlider = () => {
   const {
     errors, handleSubmit, register,
-    setImg, setBgType, bgType, setStatus,
+    setImg, setMobileImg, setBgType, bgType, setStatus,
     handleSubmitSlider, isSubmitted, setIsSubmitted,
   } = useSliderSubmit();
 
@@ -17,7 +17,27 @@ const AddSlider = () => {
         <form onSubmit={handleSubmit(handleSubmitSlider)}>
           <div className="mb-6 bg-white px-8 py-8 rounded-md">
             <h2 className="text-base font-semibold text-heading mb-4">Add Slider</h2>
-            <GlobalImgUpload isSubmitted={isSubmitted} setImage={setImg} image="" setIsSubmitted={setIsSubmitted} />
+
+            <GlobalImgUpload
+              isSubmitted={isSubmitted}
+              setImage={setImg}
+              image=""
+              setIsSubmitted={setIsSubmitted}
+              label="Desktop Image (required)"
+              inputId="slider-desktop-img"
+            />
+
+            <GlobalImgUpload
+              isSubmitted={isSubmitted}
+              setImage={setMobileImg}
+              image=""
+              setIsSubmitted={setIsSubmitted}
+              label="Mobile Image (optional — portrait recommended)"
+              inputId="slider-mobile-img"
+            />
+            <p className="text-xs text-gray-500 -mt-4 mb-5">
+              If mobile image is empty, desktop image will be used on phones.
+            </p>
 
             <div className="mb-5">
               <label className="mb-1 block text-sm font-medium text-heading">Title</label>
@@ -61,7 +81,6 @@ const AddSlider = () => {
             <div className="mb-6">
               <label className="mb-1 block text-sm font-medium text-heading">Status</label>
               <select onChange={(e) => setStatus(e.target.value as "active" | "inactive")} className="w-full border border-gray-300 rounded px-3 py-2 text-sm">
-
                 <option value="active">Active</option>
                 <option value="inactive">Inactive</option>
               </select>

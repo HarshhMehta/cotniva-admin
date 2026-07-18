@@ -6,6 +6,7 @@ import { notifyError, notifySuccess } from "@/utils/toast";
 
 const useSliderSubmit = () => {
   const [img, setImg] = useState<string>("");
+  const [mobileImg, setMobileImg] = useState<string>("");
   const [status, setStatus] = useState<"active" | "inactive">("active");
   const [bgType, setBgType] = useState<string>("green_bg");
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
@@ -18,9 +19,10 @@ const useSliderSubmit = () => {
 
   const handleSubmitSlider = async (data: any) => {
     try {
-      if (!img) return notifyError("Please upload slider image");
+      if (!img) return notifyError("Please upload desktop slider image");
       const slider_data = {
         img,
+        mobileImg: mobileImg || "",
         title: data.title || "",
         link: data.link || "/shop",
         pre_title_text: data.pre_title_text || "Starting at",
@@ -41,6 +43,7 @@ const useSliderSubmit = () => {
       setIsSubmitted(true);
       reset();
       setImg("");
+      setMobileImg("");
     } catch (error) {
       notifyError("Something went wrong");
     }
@@ -48,8 +51,10 @@ const useSliderSubmit = () => {
 
   const handleSubmitEditSlider = async (data: any, id: string) => {
     try {
+      if (!img) return notifyError("Please upload desktop slider image");
       const slider_data = {
         img,
+        mobileImg: mobileImg || "",
         title: data.title || "",
         link: data.link || "/shop",
         pre_title_text: data.pre_title_text,
@@ -76,6 +81,7 @@ const useSliderSubmit = () => {
   return {
     register, handleSubmit, errors,
     setImg, img,
+    setMobileImg, mobileImg,
     setStatus, setBgType, bgType,
     handleSubmitSlider, handleSubmitEditSlider,
     isSubmitted, setIsSubmitted,
