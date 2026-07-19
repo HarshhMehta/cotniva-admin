@@ -9,6 +9,7 @@ import { getDefaultVariant } from "@/utils/utils";
 const ProductTableItem = ({ product }: { product: IProduct }) => {
   const {_id, img, title, sku, price, reviews, status, quantity,imageURLs } = product || {};
   const defaultItem = getDefaultVariant(imageURLs || []);
+  const imageSrc = defaultItem?.img || img || "/assets/img/product/prodcut-1.jpg";
   const averageRating =
     reviews && reviews?.length > 0
       ? reviews.reduce((acc, review) => acc + review.rating, 0) / reviews.length
@@ -20,7 +21,7 @@ const ProductTableItem = ({ product }: { product: IProduct }) => {
         <a href="#" className="flex items-center space-x-5">
           <Image
             className="w-[60px] h-[60px] rounded-md object-cover bg-[#F2F3F5]"
-            src={defaultItem.img}
+            src={imageSrc}
             width={60}
             height={60}
             alt="product img"

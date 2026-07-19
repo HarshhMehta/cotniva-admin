@@ -10,6 +10,7 @@ const ProductGridItem = ({ product }: { product: IProduct }) => {
   const { _id,img, title, sku, price, reviews, status, quantity,imageURLs } = product || {};
 
   const defaultItem = getDefaultVariant(imageURLs || []);
+  const imageSrc = defaultItem?.img || img || "/assets/img/product/prodcut-1.jpg";
   // averageRating
   const averageRating =
     reviews && reviews?.length > 0
@@ -21,7 +22,7 @@ const ProductGridItem = ({ product }: { product: IProduct }) => {
         <a href="#" className="inline-block bg-[#F2F3F5]">
           <Image
             className="w-full"
-            src={defaultItem.img}
+            src={imageSrc}
             width={279}
             height={297}
             alt="product img"
