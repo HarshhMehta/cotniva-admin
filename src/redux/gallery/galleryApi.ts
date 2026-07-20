@@ -3,6 +3,8 @@ import { apiSlice } from "../api/apiSlice";
 export interface IGallery {
   _id?: string;
   img: string;
+  poster?: string;
+  mediaType?: "image" | "video";
   link?: string;
   status?: "active" | "inactive";
   order?: number;

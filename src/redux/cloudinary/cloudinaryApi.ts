@@ -12,6 +12,13 @@ export const authApi = apiSlice.injectEndpoints({
         body: data,
       }),
     }),
+    uploadMedia: builder.mutation<ICloudinaryPostResponse, FormData>({
+      query: (data) => ({
+        url: "/api/cloudinary/add-media",
+        method: "POST",
+        body: data,
+      }),
+    }),
     uploadImageMultiple: builder.mutation<ICloudinaryMultiplePostRes, FormData>({
       query: (data) => ({
         url: "/api/cloudinary/add-multiple-img",
@@ -37,4 +44,5 @@ export const {
   useDeleteCloudinaryImgMutation,
   useUploadImageMutation,
   useUploadImageMultipleMutation,
+  useUploadMediaMutation,
 } = authApi;

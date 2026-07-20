@@ -5,9 +5,10 @@ export interface ICloudinaryDeleteResponse {
 }
 
 export interface ICloudinaryPostResponse {
-  status: string;
+  success?: boolean;
+  status?: string;
   message: string;
-  data: {url:string,id:string};
+  data: { url: string; id: string; resourceType?: string };
 }
 
 export interface ICloudinaryMultiplePostRes {

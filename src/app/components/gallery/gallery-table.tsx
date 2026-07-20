@@ -21,7 +21,7 @@ const GalleryTable = () => {
     if (!confirm("Are you sure you want to delete?")) return;
     const res = await deleteGallery(id);
     if ("error" in res) return notifyError("Delete failed");
-    notifySuccess("Gallery image deleted successfully");
+    notifySuccess("Gallery item deleted successfully");
   };
 
   let content = null;
@@ -40,7 +40,10 @@ const GalleryTable = () => {
                 ID
               </th>
               <th className="px-3 py-3 text-tiny text-text2 uppercase font-semibold">
-                Image
+                Media
+              </th>
+              <th className="px-3 py-3 text-tiny text-text2 uppercase font-semibold">
+                Type
               </th>
               <th className="px-3 py-3 text-tiny text-text2 uppercase font-semibold">
                 URL / Link
@@ -75,18 +78,36 @@ const GalleryTable = () => {
                       background: "#f3f4f6",
                     }}
                   >
-                    <Image
-                      src={item.img}
-                      alt="gallery"
-                      width={72}
-                      height={90}
-                      style={{
-                        objectFit: "cover",
-                        width: "100%",
-                        height: "100%",
-                      }}
-                    />
+                    {item.mediaType === "video" ? (
+                      <video
+                        src={item.img}
+                        muted
+                        playsInline
+                        style={{
+                          objectFit: "cover",
+                          width: "100%",
+                          height: "100%",
+                        }}
+                      />
+                    ) : (
+                      <Image
+                        src={item.img}
+                        alt="gallery"
+                        width={72}
+                        height={90}
+                        style={{
+                          objectFit: "cover",
+                          width: "100%",
+                          height: "100%",
+                        }}
+                      />
+                    )}
                   </div>
+                </td>
+                <td className="px-3 py-3 align-middle">
+                  <span className="px-2 py-1 rounded text-xs font-medium bg-gray-100 text-gray-600 capitalize">
+                    {item.mediaType || "image"}
+                  </span>
                 </td>
                 <td className="px-3 py-3 text-[#55585B] text-sm align-middle">
                   {item.link || "/shop"}

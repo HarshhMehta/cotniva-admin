@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import useGallerySubmit from "@/hooks/useGallerySubmit";
-import GlobalImgUpload from "../category/global-img-upload";
+import GalleryMediaUpload from "./gallery-media-upload";
 import GalleryTable from "./gallery-table";
 
 const AddGallery = () => {
@@ -10,6 +10,9 @@ const AddGallery = () => {
     handleSubmit,
     register,
     setImg,
+    img,
+    mediaType,
+    setMediaType,
     setStatus,
     handleSubmitGallery,
     isSubmitted,
@@ -22,12 +25,50 @@ const AddGallery = () => {
         <form onSubmit={handleSubmit(handleSubmitGallery)}>
           <div className="mb-6 bg-white px-8 py-8 rounded-md">
             <h2 className="text-base font-semibold text-heading mb-4">
-              Add Gallery Image
+              Add Gallery Media
             </h2>
-            <GlobalImgUpload
+
+            <div className="mb-5">
+              <label className="mb-1 block text-sm font-medium text-heading">
+                Media Type
+              </label>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMediaType("image");
+                    setImg("");
+                  }}
+                  className={`flex-1 py-2 text-sm rounded border transition ${
+                    mediaType === "image"
+                      ? "bg-theme text-white border-theme"
+                      : "border-gray-300 text-heading hover:border-theme"
+                  }`}
+                >
+                  Photo
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMediaType("video");
+                    setImg("");
+                  }}
+                  className={`flex-1 py-2 text-sm rounded border transition ${
+                    mediaType === "video"
+                      ? "bg-theme text-white border-theme"
+                      : "border-gray-300 text-heading hover:border-theme"
+                  }`}
+                >
+                  Video
+                </button>
+              </div>
+            </div>
+
+            <GalleryMediaUpload
+              mediaType={mediaType}
+              mediaUrl={img}
+              setMediaUrl={setImg}
               isSubmitted={isSubmitted}
-              setImage={setImg}
-              image=""
               setIsSubmitted={setIsSubmitted}
             />
 
@@ -75,7 +116,7 @@ const AddGallery = () => {
             </div>
 
             <button type="submit" className="tp-btn px-7 py-2">
-              Add Gallery Image
+              Add Gallery {mediaType === "video" ? "Video" : "Image"}
             </button>
           </div>
         </form>
