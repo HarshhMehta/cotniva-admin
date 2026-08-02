@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ImageUpload from "../../common/image-upload";
 import { Variant } from "@/types/product-type";
 
@@ -9,10 +9,20 @@ interface VariantModalProps {
   editData?: Variant | null;
 }
 
-/** Gallery image modal — image + default only (no color) */
+/** Gallery image modal — image, colour (for shop filter), default flag */
 export default function VariantModal({ isOpen, onClose, onSave, editData = null }: VariantModalProps) {
   const [thumbnail, setThumbnail] = useState(editData?.img ? [editData.img] : null);
   const [isDefault, setIsDefault] = useState(editData?.isDefault || false);
+  const [colorName, setColorName] = useState(editData?.color || "");
+  const [colorCode, setColorCode] = useState(editData?.colorCode || "#4a1f1a");
+
+  useEffect(() => {
+    if (!isOpen) return;
+    setThumbnail(editData?.img ? [editData.img] : null);
+    setIsDefault(editData?.isDefault || false);
+    setColorName(editData?.color || "");
+    setColorCode(editData?.colorCode || "#4a1f1a");
+  }, [isOpen, editData]);
 
   const handleSave = () => {
     if (!thumbnail) {
@@ -22,13 +32,16 @@ export default function VariantModal({ isOpen, onClose, onSave, editData = null 
 
     onSave({
       img: thumbnail[0],
-      color: "",
+      color: colorName.trim(),
+      colorCode: colorName.trim() ? colorCode : "",
       size: "",
       isDefault,
     });
 
     setThumbnail(null);
     setIsDefault(false);
+    setColorName("");
+    setColorCode("#4a1f1a");
     onClose();
   };
 
@@ -56,6 +69,31 @@ export default function VariantModal({ isOpen, onClose, onSave, editData = null 
               setImages={setThumbnail}
               multiple={false}
             />
+          </div>
+
+          <div>
+            <label className="block font-medium text-gray-600 mb-2">
+              Colour <span className="text-gray-400 font-normal">(for shop filter)</span>
+            </label>
+            <p className="text-sm text-gray-500 mb-2">
+              Add a colour name + swatch so customers can filter by colour on Shop / New Arrival.
+            </p>
+            <div className="flex gap-3 items-center">
+              <input
+                type="text"
+                value={colorName}
+                onChange={(e) => setColorName(e.target.value)}
+                placeholder="e.g. Maroon, Ivory, Black"
+                className="flex-1 px-4 py-2.5 border border-gray2 rounded-lg focus:outline-none focus:border-blue-500"
+              />
+              <input
+                type="color"
+                value={colorCode || "#4a1f1a"}
+                onChange={(e) => setColorCode(e.target.value)}
+                className="w-12 h-11 rounded cursor-pointer border border-gray2"
+                title="Colour swatch"
+              />
+            </div>
           </div>
 
           <div className="flex items-center gap-2">

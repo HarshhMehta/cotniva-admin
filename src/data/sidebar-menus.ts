@@ -37,6 +37,12 @@ const sidebar_menu: Array<ISidebarMenus> = [
     title: "Category",
   },
   {
+    id: 16,
+    icon: Pages,
+    link: "/size-guide",
+    title: "Size Guides",
+  },
+  {
     id: 4,
     icon: Orders,
     link: "/orders",

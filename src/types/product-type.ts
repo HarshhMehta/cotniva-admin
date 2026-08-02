@@ -131,6 +131,7 @@ export interface IDelReviewsRes {
 export interface Variant {
   img: File | string;
   color: string;
+  colorCode?: string;
   size: string;
   isDefault: boolean;
 }
@@ -155,6 +156,8 @@ export interface ProductFormData {
   status: "in-stock" | "out-of-stock" | "discontinued";
   productType: string;
   description: string;
+  productHighlights?: string;
+  fabricCare?: string;
   youtube_video_Id?: string;
   tags: string;
   sizes: string;

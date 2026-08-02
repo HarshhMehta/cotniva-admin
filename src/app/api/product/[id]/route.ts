@@ -34,6 +34,8 @@ export async function PUT(
     const status = formData.get("status") as string;
     const productType = formData.get("productType") as string;
     const description = formData.get("description") as string;
+    const productHighlights = (formData.get("productHighlights") as string) || "";
+    const fabricCare = (formData.get("fabricCare") as string) || "";
     const videoId = formData.get("videoId") as string;
     const featured = formData.get("featured") === "true";
     const newArrival = formData.get("newArrival") === "true";
@@ -101,6 +103,14 @@ export async function PUT(
         return {
           img: imageUrl,
           isDefault: variant.isDefault || false,
+          ...(variant.color
+            ? {
+                color: {
+                  name: variant.color,
+                  clrCode: variant.colorCode || "",
+                },
+              }
+            : {}),
         };
       })
     );
@@ -112,6 +122,8 @@ export async function PUT(
     }
 
     const sizes = JSON.parse(formData.get("sizes") as string || "[]");
+    const sizeGuideRaw = formData.get("sizeGuide") as string;
+    const sizeGuide = sizeGuideRaw && sizeGuideRaw !== "null" ? sizeGuideRaw : null;
 
     // Prepare product payload
     const productPayload = {
@@ -136,10 +148,13 @@ export async function PUT(
       status: status || "in-stock",
       productType: (productType || "general").toLowerCase(),
       description,
+      productHighlights,
+      fabricCare,
       videoId: videoId || "",
       additionalInformation,
       tags,
       sizes,
+      sizeGuide,
       offerDate: {
         startDate: offerDate?.startDate || null,
         endDate: offerDate?.endDate || null,

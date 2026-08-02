@@ -50,6 +50,8 @@ export default function ProductForm({ productEdit }: IProps) {
       status: "in-stock",
       productType: "",
       description: "",
+      productHighlights: "",
+      fabricCare: "",
       youtube_video_Id: "",
       tags: "",
       sizes: "",
@@ -66,8 +68,19 @@ export default function ProductForm({ productEdit }: IProps) {
   const [variantError, setVariantError] = useState<string>("");
   const [additionalInfo, setAdditionalInfo] = useState<AdditionalInfo[]>([]);
   const [productSizes, setProductSizes] = useState<string[]>([]);
+  const [sizeGuides, setSizeGuides] = useState<{ _id: string; title: string }[]>([]);
+  const [selectedSizeGuide, setSelectedSizeGuide] = useState<string>("");
 
   const SIZE_OPTIONS = ["XS", "S", "M", "L", "XL", "XXL"];
+
+  useEffect(() => {
+    fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/size-guide/show`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) setSizeGuides(data.data || []);
+      })
+      .catch(() => {});
+  }, []);
 
   const toggleSize = (size: string) => {
     setProductSizes((prev) =>
@@ -147,6 +160,8 @@ export default function ProductForm({ productEdit }: IProps) {
       status: productEdit.status ?? "in-stock",
       productType: productEdit.productType ?? "",
       description: productEdit.description ?? "",
+      productHighlights: productEdit.productHighlights ?? "",
+      fabricCare: productEdit.fabricCare ?? "",
       youtube_video_Id: productEdit.videoId ?? "",
       tags: (productEdit.tags ?? []).join(", "),
       sizes: productEdit.sizes ?? "",
@@ -159,7 +174,8 @@ export default function ProductForm({ productEdit }: IProps) {
 
     if (Array.isArray(productEdit.imageURLs)) {
       const v = productEdit.imageURLs.map((imgObj: any) => ({
-        color: "",
+        color: imgObj?.color?.name ?? "",
+        colorCode: imgObj?.color?.clrCode ?? "",
         img: imgObj.img ?? "",
         size: "",
         isDefault: !!imgObj.isDefault,
@@ -175,6 +191,11 @@ export default function ProductForm({ productEdit }: IProps) {
         : typeof productEdit.sizes === "string" && productEdit.sizes
           ? productEdit.sizes.split(",").map((s: string) => s.trim()).filter(Boolean)
           : []
+    );
+
+    const sg = productEdit.sizeGuide;
+    setSelectedSizeGuide(
+      typeof sg === "string" ? sg : sg?._id ? String(sg._id) : ""
     );
 
     setAdditionalInfo(productEdit.additionalInformation ?? []);
@@ -221,6 +242,8 @@ export default function ProductForm({ productEdit }: IProps) {
       formData.append("newArrival", data.newArrival ? "true" : "false");
       formData.append("bestSeller", data.bestSeller ? "true" : "false");
       formData.append("description", data.description);
+      formData.append("productHighlights", data.productHighlights || "");
+      formData.append("fabricCare", data.fabricCare || "");
       formData.append("videoId", data.youtube_video_Id || "");
       formData.append("featured", data.featured ? "true" : "false");
 
@@ -248,14 +271,15 @@ export default function ProductForm({ productEdit }: IProps) {
       formData.append("additionalInformation", JSON.stringify(additionalInformation));
 
       const variantsData = variants.map((v) => ({
-        color: "",
-        colorCode: "",
+        color: v.color || "",
+        colorCode: v.colorCode || "",
         size: "",
         isDefault: v.isDefault || false,
         img: typeof v.img === "string" ? v.img : "",
       }));
       formData.append("variants", JSON.stringify(variantsData));
       formData.append("sizes", JSON.stringify(productSizes));
+      formData.append("sizeGuide", selectedSizeGuide || "");
 
       if (productEdit && productEdit._id) {
         const oldImages = (productEdit.imageURLs || []).map((img: any) => img.img);
@@ -500,6 +524,9 @@ export default function ProductForm({ productEdit }: IProps) {
                         Thumbnail
                       </th>
                       <th className="text-left py-3 px-4 font-medium text-gray-600">
+                        Colour
+                      </th>
+                      <th className="text-left py-3 px-4 font-medium text-gray-600">
                         Default
                       </th>
                       <th className="text-left py-3 px-4 font-medium text-gray-600">
@@ -520,6 +547,19 @@ export default function ProductForm({ productEdit }: IProps) {
                             alt="Gallery"
                             className="w-12 h-12 object-cover rounded"
                           />
+                        </td>
+                        <td className="py-3 px-4">
+                          {variant.color ? (
+                            <span className="inline-flex items-center gap-2 text-sm text-gray-700">
+                              <span
+                                className="inline-block w-4 h-4 rounded-full border border-gray-300"
+                                style={{ background: variant.colorCode || "#ccc" }}
+                              />
+                              {variant.color}
+                            </span>
+                          ) : (
+                            <span className="text-sm text-gray-400">—</span>
+                          )}
                         </td>
                         <td className="py-3 px-4">
                           {variant.isDefault && (
@@ -585,6 +625,32 @@ export default function ProductForm({ productEdit }: IProps) {
             </div>
           </div>
 
+          {/* Size Guide */}
+          <div className="border border-gray2 rounded-lg p-4 mb-4">
+            <h3 className="text-lg font-semibold text-gray-800 mb-3">Size Guide</h3>
+            <p className="text-sm text-gray-500 mb-3">
+              Attach a reusable size chart (create charts under Size Guides in the sidebar).
+            </p>
+            <select
+              value={selectedSizeGuide}
+              onChange={(e) => setSelectedSizeGuide(e.target.value)}
+              className="input w-full h-[44px] rounded-md border border-gray6 px-4 text-base"
+              disabled={isSubmitting}
+            >
+              <option value="">No size guide</option>
+              {sizeGuides.map((g) => (
+                <option key={g._id} value={g._id}>
+                  {g.title}
+                </option>
+              ))}
+            </select>
+            {sizeGuides.length === 0 && (
+              <p className="text-xs text-gray-400 mt-2">
+                No size guides yet — add one from the Size Guides menu first.
+              </p>
+            )}
+          </div>
+
           {/* Description */}
           <div className="mb-4">
             <label className="block font-medium mb-1.5">
@@ -602,10 +668,45 @@ export default function ProductForm({ productEdit }: IProps) {
             )}
           </div>
 
-          {/* Additional Information */}
+          {/* Product Highlights — accordion on product page */}
+          <div className="mb-4">
+            <label className="block font-medium mb-1.5">Product Highlights</label>
+            <p className="text-xs text-gray-400 mb-2">
+              Shows under buttons → Product Highlights accordion on the product page.
+            </p>
+            <textarea
+              {...register("productHighlights")}
+              rows={4}
+              className="input h-[100px] resize-none w-full py-3 text-base"
+              placeholder={"Soft premium fabric\nBreathable all-day comfort\nEasy everyday styling"}
+              disabled={isSubmitting}
+            />
+          </div>
+
+          {/* Fabric & Care — accordion on product page */}
+          <div className="mb-4">
+            <label className="block font-medium mb-1.5">Fabric & Care</label>
+            <p className="text-xs text-gray-400 mb-2">
+              Shows under buttons → Fabric & Care accordion on the product page.
+            </p>
+            <textarea
+              {...register("fabricCare")}
+              rows={4}
+              className="input h-[100px] resize-none w-full py-3 text-base"
+              placeholder={"Machine wash cold\nDo not bleach\nTumble dry low\nWarm iron if needed"}
+              disabled={isSubmitting}
+            />
+          </div>
+
+          {/* Style Highlights (gallery overlay on 2nd image) */}
           <div className="border border-gray2 rounded-lg p-4">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-800">Additional Information</h3>
+            <div className="flex items-center justify-between mb-2">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-800">Style Highlights</h3>
+                <p className="text-xs text-gray-400 mt-1">
+                  Overlay on the 2nd gallery image (e.g. Composition, GSM, Color, Fit).
+                </p>
+              </div>
               <button
                 type="button"
                 onClick={handleAddAdditionalInfo}
@@ -625,7 +726,7 @@ export default function ProductForm({ productEdit }: IProps) {
                       type="text"
                       value={info.key}
                       onChange={(e) => handleAdditionalInfoChange(index, "key", e.target.value)}
-                      placeholder="Key (e.g., Weight)"
+                      placeholder="Key (e.g., Composition)"
                       className="flex-1 px-4 py-2.5 border border-gray2 rounded-lg focus:outline-none focus:border-blue-500"
                       disabled={isSubmitting}
                     />
@@ -633,7 +734,7 @@ export default function ProductForm({ productEdit }: IProps) {
                       type="text"
                       value={info.value}
                       onChange={(e) => handleAdditionalInfoChange(index, "value", e.target.value)}
-                      placeholder="Value (e.g., 180g)"
+                      placeholder="Value (e.g., 100% Cotton)"
                       className="flex-1 px-4 py-2.5 border border-gray2 rounded-lg focus:outline-none focus:border-blue-500"
                       disabled={isSubmitting}
                     />
