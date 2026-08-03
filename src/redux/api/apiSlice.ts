@@ -42,5 +42,8 @@ export const apiSlice = createApi({
     "getSlider",
     "AllGallery",
     "getGallery",
+    "Notifications",
+    "NotificationCount",
+    "Customers",
   ],
 });

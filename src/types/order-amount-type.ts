@@ -1,23 +1,55 @@
 import { IProduct } from "./product-type";
 
-// user 
 interface IUser {
   _id: string;
   name: string;
-  email: string;
+  email?: string;
+  phone?: string;
+  contactNumber?: string;
   password?: string;
   imageURL?: string;
-  role: string;
-  status: string;
+  role?: string;
+  status?: string;
   reviews?: string[];
-  createdAt: string;
-  updatedAt: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface IPaymentIntent {
+  razorpay_order_id?: string;
+  razorpay_payment_id?: string;
+  razorpay_signature?: string;
+  gateway?: string;
+  shipping_address?: {
+    line1?: string;
+    line2?: string;
+    city?: string;
+    state?: string;
+    zipcode?: string;
+    country?: string;
+    name?: string;
+    contact?: string;
+    [key: string]: unknown;
+  } | null;
+  customer_details?: Record<string, unknown> | null;
+  shipping_fee?: number | null;
+  cod_fee?: number | null;
+  address_synced_at?: string;
+  [key: string]: unknown;
+}
+
+export interface IOrderCartItem extends IProduct {
+  selectedSize?: string;
+  orderQuantity: number;
+  img?: string;
+  imageURLs?: { img?: string; isDefault?: boolean }[];
+  discount?: number;
 }
 
 export interface Order {
   _id: string;
-  user:IUser;
-  cart: IProduct[];
+  user: IUser | string;
+  cart: IOrderCartItem[];
   name: string;
   address: string;
   email: string;
@@ -32,12 +64,14 @@ export interface Order {
   shippingOption: string;
   paymentMethod: string;
   orderNote?: string;
+  adminNotes?: string;
+  paymentIntent?: IPaymentIntent;
+  cardInfo?: Record<string, unknown>;
   invoice: number;
   status: string;
   createdAt?: string;
   updatedAt?: string;
 }
-
 
 export interface IOrderAmounts {
   todayOrderAmount: number;
@@ -50,8 +84,6 @@ export interface IOrderAmounts {
   yesterDayCashPaymentAmount: number;
 }
 
-
-
 export interface ISalesEntry {
   date: string;
   total: number;
@@ -62,7 +94,6 @@ export interface ISalesReport {
   salesReport: ISalesEntry[];
 }
 
-
 export interface IMostSellingCategory {
   categoryData: {
     _id: string;
@@ -70,7 +101,6 @@ export interface IMostSellingCategory {
   }[];
 }
 
-// I Dashboard Recent Orders
 export interface IOrder {
   _id: string;
   user: string;
@@ -88,12 +118,11 @@ export interface IDashboardRecentOrders {
   totalOrder: number;
 }
 
-// get all orders type 
 export interface IGetAllOrdersRes {
   success: boolean;
   data: Order[];
 }
-// get all orders type 
+
 export interface IUpdateStatusOrderRes {
   success: boolean;
   message: string;

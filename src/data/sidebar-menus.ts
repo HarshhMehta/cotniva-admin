@@ -3,6 +3,7 @@ import {
   Dashboard,
   Categories,
   Coupons,
+  Customers,
   Orders,
   Pages,
   Products,
@@ -27,7 +28,7 @@ const sidebar_menu: Array<ISidebarMenus> = [
     subMenus: [
       { title: "Product List", link: "/product-list" },
       { title: "Product Grid", link: "/product-grid" },
-      { title: "Add Product", link: "/add-product" }
+      { title: "Add Product", link: "/add-product" },
     ],
   },
   {
@@ -47,6 +48,12 @@ const sidebar_menu: Array<ISidebarMenus> = [
     icon: Orders,
     link: "/orders",
     title: "Orders",
+  },
+  {
+    id: 17,
+    icon: Customers,
+    link: "/customers",
+    title: "Customers",
   },
   {
     id: 6,
@@ -86,7 +93,7 @@ const sidebar_menu: Array<ISidebarMenus> = [
     subMenus: [
       { title: "Register", link: "/register" },
       { title: "Login", link: "/login" },
-      { title: "Forgot Password", link: "/forgot-password" }
+      { title: "Forgot Password", link: "/forgot-password" },
     ],
   },
   {

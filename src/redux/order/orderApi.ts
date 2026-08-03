@@ -40,14 +40,14 @@ export const authApi = apiSlice.injectEndpoints({
     getAllOrders: builder.query<IGetAllOrdersRes, void>({
       query: () => `/api/order/orders`,
       providesTags: ["AllOrders"],
-      keepUnusedDataFor: 600,
+      keepUnusedDataFor: 30,
     }),
     // get recent orders
     getSingleOrder: builder.query<Order, string>({
       query: (id) => `/api/order/${id}`,
+      providesTags: (result, error, id) => [{ type: "AllOrders", id }],
       keepUnusedDataFor: 600,
     }),
-    // get recent orders
     updateStatus: builder.mutation<IUpdateStatusOrderRes, { id: string, status: { status: string } }>({
       query({ id, status }) {
         return {
@@ -57,6 +57,31 @@ export const authApi = apiSlice.injectEndpoints({
         };
       },
       invalidatesTags: ["AllOrders","DashboardRecentOrders"],
+    }),
+    updateAdminNotes: builder.mutation<
+      { success: boolean; message: string; order?: Order },
+      { id: string; adminNotes: string }
+    >({
+      query({ id, adminNotes }) {
+        return {
+          url: `/api/order/update-notes/${id}`,
+          method: "PATCH",
+          body: { adminNotes },
+        };
+      },
+      invalidatesTags: ["AllOrders"],
+    }),
+    syncRazorpayAddress: builder.mutation<
+      { success: boolean; message: string; order?: Order },
+      string
+    >({
+      query(id) {
+        return {
+          url: `/api/order/sync-razorpay-address/${id}`,
+          method: "POST",
+        };
+      },
+      invalidatesTags: ["AllOrders"],
     }),
   }),
 });
@@ -69,4 +94,6 @@ export const {
   useGetAllOrdersQuery,
   useUpdateStatusMutation,
   useGetSingleOrderQuery,
+  useUpdateAdminNotesMutation,
+  useSyncRazorpayAddressMutation,
 } = authApi;
