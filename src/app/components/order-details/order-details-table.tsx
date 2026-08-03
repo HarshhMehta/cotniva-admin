@@ -22,8 +22,21 @@ const OrderDetailsTable = ({orderData}:IPropType) => {
                               </td>
                               <td  className="py-3 whitespace-nowrap ">
                                   <a href="#" className="flex items-center justify-end space-x-5 text-end text-heading text-hover-primary">
-                                      {orderData?.user?.imageURL && <Image className="w-10 h-10 rounded-full" src={orderData?.user?.imageURL} alt="user-img"/>}
-                                      <span className="font-medium">{orderData?.user?.name}</span>
+                                      {typeof orderData.user === "object" &&
+                                        orderData.user?.imageURL && (
+                                          <Image
+                                            className="w-10 h-10 rounded-full"
+                                            src={orderData.user.imageURL}
+                                            alt="user-img"
+                                          />
+                                        )}
+                                      <span className="font-medium">
+                                        {(typeof orderData.user === "object"
+                                          ? orderData.user?.name
+                                          : "") ||
+                                          orderData.name ||
+                                          "Guest"}
+                                      </span>
                                   </a>
                               </td>                                            
                           </tr>                                                           
@@ -32,7 +45,13 @@ const OrderDetailsTable = ({orderData}:IPropType) => {
                                   Email
                               </td>
                               <td  className="py-3 text-end">
-                                  <a href="mailto:support@mail.com">{orderData?.user?.email}</a>
+                                  <a href={`mailto:${orderData.email || ""}`}>
+                                    {(typeof orderData.user === "object"
+                                      ? orderData.user?.email
+                                      : "") ||
+                                      orderData.email ||
+                                      "—"}
+                                  </a>
                               </td>                                            
                           </tr>                                                           
                           <tr className="bg-white border-b border-gray6 last:border-0 text-start mx-9">
