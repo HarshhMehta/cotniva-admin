@@ -7,6 +7,7 @@ import { useGetSingleOrderQuery } from "@/redux/order/orderApi";
 import { Invoice } from "@/svg";
 import { useReactToPrint } from "react-to-print";
 import { notifyError } from "@/utils/toast";
+import { getOrderCustomerName } from "@/types/order-amount-type";
 
 const OrderDetailsArea = ({ id }: { id: string }) => {
   const { data: orderData, isLoading, isError } = useGetSingleOrderQuery(id);
@@ -92,11 +93,7 @@ const OrderDetailsArea = ({ id }: { id: string }) => {
                     INVOICE TO
                   </span>
                   <span className="text-base text-gray-500 block">
-                    {(typeof orderData.user === "object"
-                      ? orderData.user?.name
-                      : "") ||
-                      orderData.name ||
-                      "Guest"}{" "}
+                    {getOrderCustomerName(orderData)}
                     <br />
                     <span className="ml-2">{orderData.contact}</span>
                     <br />

@@ -1,4 +1,4 @@
-import { Order } from '@/types/order-amount-type';
+import { Order, getOrderUser, getOrderCustomerName } from '@/types/order-amount-type';
 import dayjs from 'dayjs';
 import Image from 'next/image';
 import React from 'react';
@@ -8,6 +8,7 @@ type IPropType = {
     orderData:Order;
 }
 const OrderDetailsTable = ({orderData}:IPropType) => {
+  const user = getOrderUser(orderData.user);
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-6 mb-6">
@@ -22,20 +23,15 @@ const OrderDetailsTable = ({orderData}:IPropType) => {
                               </td>
                               <td  className="py-3 whitespace-nowrap ">
                                   <a href="#" className="flex items-center justify-end space-x-5 text-end text-heading text-hover-primary">
-                                      {typeof orderData.user === "object" &&
-                                        orderData.user?.imageURL && (
+                                      {user?.imageURL && (
                                           <Image
                                             className="w-10 h-10 rounded-full"
-                                            src={orderData.user.imageURL}
+                                            src={user.imageURL}
                                             alt="user-img"
                                           />
                                         )}
                                       <span className="font-medium">
-                                        {(typeof orderData.user === "object"
-                                          ? orderData.user?.name
-                                          : "") ||
-                                          orderData.name ||
-                                          "Guest"}
+                                        {getOrderCustomerName(orderData)}
                                       </span>
                                   </a>
                               </td>                                            
@@ -46,11 +42,7 @@ const OrderDetailsTable = ({orderData}:IPropType) => {
                               </td>
                               <td  className="py-3 text-end">
                                   <a href={`mailto:${orderData.email || ""}`}>
-                                    {(typeof orderData.user === "object"
-                                      ? orderData.user?.email
-                                      : "") ||
-                                      orderData.email ||
-                                      "—"}
+                                    {user?.email || orderData.email || "—"}
                                   </a>
                               </td>                                            
                           </tr>                                                           

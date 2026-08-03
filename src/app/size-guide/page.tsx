@@ -6,7 +6,22 @@ import GalleryMediaUpload from "../components/gallery/gallery-media-upload";
 
 const API = () => `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/size-guide`;
 
-const emptyForm = () => ({
+type SizeGuideRow = { label: string; values: string[] };
+type HowToMeasure = { label: string; text: string };
+type SizeGuideForm = {
+  title: string;
+  unitLabel: string;
+  sizes: string[];
+  rows: SizeGuideRow[];
+  tip: string;
+  howToMeasure: HowToMeasure[];
+  tagline: string;
+  diagramImage: string;
+  status: string;
+};
+type SizeGuideItem = SizeGuideForm & { _id: string };
+
+const emptyForm = (): SizeGuideForm => ({
   title: "",
   unitLabel: "BODY MEASUREMENTS IN INCHES",
   sizes: ["XS", "S", "M", "L", "XL", "XXL"],
@@ -31,11 +46,11 @@ const emptyForm = () => ({
 });
 
 export default function SizeGuidePage() {
-  const [list, setList] = useState([]);
+  const [list, setList] = useState<SizeGuideItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [editId, setEditId] = useState(null);
-  const [form, setForm] = useState(emptyForm());
+  const [editId, setEditId] = useState<string | null>(null);
+  const [form, setForm] = useState<SizeGuideForm>(emptyForm());
   const [diagramSubmitted, setDiagramSubmitted] = useState(false);
 
   const load = useCallback(async () => {
@@ -61,14 +76,14 @@ export default function SizeGuidePage() {
     setTimeout(() => setDiagramSubmitted(false), 0);
   };
 
-  const syncRowLengths = (sizes, rows) =>
+  const syncRowLengths = (sizes: string[], rows: SizeGuideRow[]) =>
     rows.map((row) => {
       const values = [...(row.values || [])];
       while (values.length < sizes.length) values.push("");
       return { ...row, values: values.slice(0, sizes.length) };
     });
 
-  const setSizesCsv = (csv) => {
+  const setSizesCsv = (csv: string) => {
     const sizes = csv
       .split(",")
       .map((s) => s.trim())
@@ -81,7 +96,7 @@ export default function SizeGuidePage() {
     }));
   };
 
-  const updateCell = (rowIdx, colIdx, value) => {
+  const updateCell = (rowIdx: number, colIdx: number, value: string) => {
     setForm((f) => {
       const rows = f.rows.map((r, i) => {
         if (i !== rowIdx) return r;
@@ -93,7 +108,7 @@ export default function SizeGuidePage() {
     });
   };
 
-  const updateRowLabel = (rowIdx, label) => {
+  const updateRowLabel = (rowIdx: number, label: string) => {
     setForm((f) => {
       const rows = f.rows.map((r, i) => (i === rowIdx ? { ...r, label } : r));
       return { ...f, rows };
@@ -110,14 +125,18 @@ export default function SizeGuidePage() {
     }));
   };
 
-  const removeRow = (rowIdx) => {
+  const removeRow = (rowIdx: number) => {
     setForm((f) => ({
       ...f,
       rows: f.rows.filter((_, i) => i !== rowIdx),
     }));
   };
 
-  const updateHowTo = (idx, field, value) => {
+  const updateHowTo = (
+    idx: number,
+    field: keyof HowToMeasure,
+    value: string
+  ) => {
     setForm((f) => {
       const howToMeasure = f.howToMeasure.map((h, i) =>
         i === idx ? { ...h, [field]: value } : h
@@ -133,14 +152,14 @@ export default function SizeGuidePage() {
     }));
   };
 
-  const removeHowTo = (idx) => {
+  const removeHowTo = (idx: number) => {
     setForm((f) => ({
       ...f,
       howToMeasure: f.howToMeasure.filter((_, i) => i !== idx),
     }));
   };
 
-  const handleEdit = (item) => {
+  const handleEdit = (item: SizeGuideItem) => {
     setEditId(item._id);
     setForm({
       title: item.title || "",
@@ -160,7 +179,7 @@ export default function SizeGuidePage() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const handleSave = async (e) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.title.trim()) {
       notifyError("Title is required");
@@ -190,7 +209,7 @@ export default function SizeGuidePage() {
     }
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (id: string) => {
     if (!confirm("Delete this size guide?")) return;
     try {
       const res = await fetch(`${API()}/delete/${id}`, { method: "DELETE" });

@@ -1,6 +1,6 @@
 import { IProduct } from "./product-type";
 
-interface IUser {
+export interface IUser {
   _id: string;
   name: string;
   email?: string;
@@ -38,7 +38,7 @@ export interface IPaymentIntent {
   [key: string]: unknown;
 }
 
-export interface IOrderCartItem extends IProduct {
+export interface IOrderCartItem extends Omit<IProduct, "img" | "imageURLs"> {
   selectedSize?: string;
   orderQuantity: number;
   img?: string;
@@ -71,6 +71,16 @@ export interface Order {
   status: string;
   createdAt?: string;
   updatedAt?: string;
+}
+
+/** Narrow order.user when API returns populated user vs id string */
+export function getOrderUser(user: Order["user"] | undefined | null): IUser | null {
+  if (user && typeof user === "object") return user;
+  return null;
+}
+
+export function getOrderCustomerName(order: Pick<Order, "user" | "name">): string {
+  return getOrderUser(order.user)?.name || order.name || "Guest";
 }
 
 export interface IOrderAmounts {
