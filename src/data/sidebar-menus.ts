@@ -56,6 +56,12 @@ const sidebar_menu: Array<ISidebarMenus> = [
     title: "Customers",
   },
   {
+    id: 18,
+    icon: Reviews,
+    link: "/checkout-feedback",
+    title: "Checkout Feedback",
+  },
+  {
     id: 6,
     icon: Reviews,
     link: "/reviews",
