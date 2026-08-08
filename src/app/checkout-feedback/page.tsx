@@ -1,5 +1,5 @@
 import Wrapper from "@/layout/wrapper";
-import CheckoutFeedbackArea from "../components/checkout-feedback/checkout-feedback-area";
+import CheckoutFeedbackArea from "@/components/checkout-feedback/checkout-feedback-area";
 
 const CheckoutFeedbackPage = () => {
   return (
