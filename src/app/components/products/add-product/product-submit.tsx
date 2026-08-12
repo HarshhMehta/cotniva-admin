@@ -68,6 +68,9 @@ export default function ProductForm({ productEdit }: IProps) {
   const [variantError, setVariantError] = useState<string>("");
   const [additionalInfo, setAdditionalInfo] = useState<AdditionalInfo[]>([]);
   const [productSizes, setProductSizes] = useState<string[]>([]);
+  const [sizeStock, setSizeStock] = useState<Record<string, number>>({});
+  const [sizeStockDirty, setSizeStockDirty] = useState(false);
+  const [initialSizes, setInitialSizes] = useState<string[]>([]);
   const [sizeGuides, setSizeGuides] = useState<{ _id: string; title: string }[]>([]);
   const [selectedSizeGuide, setSelectedSizeGuide] = useState<string>("");
 
@@ -83,10 +86,35 @@ export default function ProductForm({ productEdit }: IProps) {
   }, []);
 
   const toggleSize = (size: string) => {
-    setProductSizes((prev) =>
-      prev.includes(size) ? prev.filter((s) => s !== size) : [...prev, size]
-    );
+    setSizeStockDirty(true);
+    setProductSizes((prev) => {
+      if (prev.includes(size)) {
+        setSizeStock((stock) => {
+          const next = { ...stock };
+          delete next[size];
+          return next;
+        });
+        return prev.filter((s) => s !== size);
+      }
+      setSizeStock((stock) => ({ ...stock, [size]: stock[size] ?? 0 }));
+      return [...prev, size];
+    });
   };
+
+  const setSizeQuantity = (size: string, raw: string) => {
+    const n = Math.max(0, Math.floor(Number(raw) || 0));
+    setSizeStockDirty(true);
+    setSizeStock((prev) => ({ ...prev, [size]: n }));
+  };
+
+  const sizeInventoryPayload = productSizes.map((size) => ({
+    size,
+    quantity: Math.max(0, Number(sizeStock[size]) || 0),
+  }));
+  const sizeStockTotal = sizeInventoryPayload.reduce(
+    (sum, row) => sum + row.quantity,
+    0
+  );
 
   const handleAddVariant = () => {
     setIsModalOpen(true);
@@ -185,13 +213,27 @@ export default function ProductForm({ productEdit }: IProps) {
       setVariants([]);
     }
 
-    setProductSizes(
-      Array.isArray(productEdit.sizes)
-        ? productEdit.sizes
-        : typeof productEdit.sizes === "string" && productEdit.sizes
-          ? productEdit.sizes.split(",").map((s: string) => s.trim()).filter(Boolean)
-          : []
-    );
+    const loadedSizes: string[] = Array.isArray(productEdit.sizes)
+      ? productEdit.sizes
+      : typeof productEdit.sizes === "string" && productEdit.sizes
+        ? productEdit.sizes.split(",").map((s: string) => s.trim()).filter(Boolean)
+        : [];
+    setProductSizes(loadedSizes);
+    setInitialSizes(loadedSizes);
+    setSizeStockDirty(false);
+
+    const invMap: Record<string, number> = {};
+    if (Array.isArray(productEdit.sizeInventory)) {
+      productEdit.sizeInventory.forEach((row: { size?: string; quantity?: number }) => {
+        const key = String(row?.size || "").trim();
+        if (key) invMap[key] = Math.max(0, Number(row.quantity) || 0);
+      });
+    }
+    const nextStock: Record<string, number> = {};
+    loadedSizes.forEach((size: string) => {
+      nextStock[size] = invMap[size] ?? 0;
+    });
+    setSizeStock(nextStock);
 
     const sg = productEdit.sizeGuide;
     setSelectedSizeGuide(
@@ -208,6 +250,12 @@ export default function ProductForm({ productEdit }: IProps) {
     parent: productEdit?.parent || "",
     children: productEdit?.children || "",
   }), [productEdit]);
+
+  useEffect(() => {
+    if (productSizes.length > 0) {
+      setValue("quantity", sizeStockTotal, { shouldValidate: true });
+    }
+  }, [productSizes.length, sizeStockTotal, setValue]);
 
   const onSubmit: SubmitHandler<ProductFormData> = async (data) => {
     // Validate variants
@@ -234,7 +282,10 @@ export default function ProductForm({ productEdit }: IProps) {
       formData.append("unit", data.unit);
       formData.append("price", data.price.toString());
       formData.append("discount", (data.discount_percentage || 0).toString());
-      formData.append("quantity", data.quantity.toString());
+      formData.append(
+        "quantity",
+        (productSizes.length > 0 ? sizeStockTotal : data.quantity).toString()
+      );
       formData.append("parent", data.parent);
       formData.append("children", "");
       formData.append("status", data.status);
@@ -279,6 +330,12 @@ export default function ProductForm({ productEdit }: IProps) {
       }));
       formData.append("variants", JSON.stringify(variantsData));
       formData.append("sizes", JSON.stringify(productSizes));
+      const sizesChanged =
+        JSON.stringify([...productSizes].sort()) !==
+        JSON.stringify([...initialSizes].sort());
+      if (!productEdit?._id || sizeStockDirty || sizesChanged) {
+        formData.append("sizeInventory", JSON.stringify(sizeInventoryPayload));
+      }
       formData.append("sizeGuide", selectedSizeGuide || "");
 
       if (productEdit && productEdit._id) {
@@ -429,13 +486,22 @@ export default function ProductForm({ productEdit }: IProps) {
               <input
                 type="number"
                 {...register("quantity", {
-                  required: "Quantity is required",
-                  min: { value: 1, message: "Quantity greater than 0" },
+                  required: productSizes.length === 0 ? "Quantity is required" : false,
+                  min: {
+                    value: 0,
+                    message: "Quantity cannot be negative",
+                  },
                 })}
                 className="input w-full h-[44px] rounded-md border border-gray6 px-6 text-base focus:border-blue-500"
                 placeholder="0"
-                disabled={isSubmitting}
+                disabled={isSubmitting || productSizes.length > 0}
+                readOnly={productSizes.length > 0}
               />
+              {productSizes.length > 0 && (
+                <p className="text-xs text-gray-500 mt-1">
+                  Total stock from selected sizes
+                </p>
+              )}
               {errors.quantity && (
                 <p className="text-red mt-1">{errors.quantity.message}</p>
               )}
@@ -623,6 +689,26 @@ export default function ProductForm({ productEdit }: IProps) {
                 </label>
               ))}
             </div>
+            {productSizes.length > 0 && (
+              <div className="mt-4 flex flex-wrap gap-3">
+                {productSizes.map((size) => (
+                  <label
+                    key={`qty-${size}`}
+                    className="inline-flex items-center gap-2 border border-gray6 rounded-md px-3 py-2 text-sm"
+                  >
+                    <span className="font-medium text-gray-800 min-w-[28px]">{size}</span>
+                    <input
+                      type="number"
+                      min={0}
+                      value={sizeStock[size] ?? 0}
+                      onChange={(e) => setSizeQuantity(size, e.target.value)}
+                      className="input w-16 h-9 rounded-md border border-gray6 px-2 text-center text-sm"
+                      disabled={isSubmitting}
+                    />
+                  </label>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Size Guide */}

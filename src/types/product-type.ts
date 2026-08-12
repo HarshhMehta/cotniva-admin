@@ -68,6 +68,7 @@ export interface IProduct {
   bestSeller?: boolean;
   sellCount?: number;
   sizes?: string[];
+  sizeInventory?: { size: string; quantity: number }[];
   tags?: string[];
   createdAt: string;
   updatedAt: string;
@@ -111,6 +112,7 @@ export interface IAddProduct {
   }[];
   tags?: string[];
   sizes?: string[];
+  sizeInventory?: { size: string; quantity: number }[];
   offerDate?: {
     startDate: string | null,
     endDate: string | null

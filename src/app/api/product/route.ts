@@ -103,6 +103,7 @@ export async function POST(request: NextRequest) {
     }
 
     const sizes = JSON.parse(formData.get("sizes") as string || "[]");
+    const sizeInventory = JSON.parse(formData.get("sizeInventory") as string || "[]");
     const sizeGuideRaw = formData.get("sizeGuide") as string;
     const sizeGuide = sizeGuideRaw && sizeGuideRaw !== "null" ? sizeGuideRaw : null;
 
@@ -135,6 +136,7 @@ export async function POST(request: NextRequest) {
       additionalInformation,
       tags,
       sizes,
+      sizeInventory,
       sizeGuide,
       offerDate: {
         startDate: offerDate?.startDate || null,

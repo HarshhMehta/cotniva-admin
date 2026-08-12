@@ -122,6 +122,7 @@ export async function PUT(
     }
 
     const sizes = JSON.parse(formData.get("sizes") as string || "[]");
+    const sizeInventoryRaw = formData.get("sizeInventory");
     const sizeGuideRaw = formData.get("sizeGuide") as string;
     const sizeGuide = sizeGuideRaw && sizeGuideRaw !== "null" ? sizeGuideRaw : null;
 
@@ -163,6 +164,11 @@ export async function PUT(
       newArrival,
       bestSeller,
     };
+
+    if (sizeInventoryRaw != null && String(sizeInventoryRaw) !== "") {
+      (productPayload as { sizeInventory?: unknown }).sizeInventory =
+        JSON.parse(String(sizeInventoryRaw) || "[]");
+    }
 
     // Send to external server
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/product/edit-product/${productId}`, {
