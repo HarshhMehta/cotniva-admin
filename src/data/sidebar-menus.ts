@@ -121,6 +121,12 @@ const sidebar_menu: Array<ISidebarMenus> = [
     title: "Top Bar",
   },
   {
+    id: 19,
+    icon: Setting,
+    link: "/shipping",
+    title: "Shipping",
+  },
+  {
     id: 15,
     icon: Setting,
     link: "/whatsapp",
