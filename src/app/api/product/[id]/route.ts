@@ -213,3 +213,11 @@ export async function PUT(
     );
   }
 }
+
+/** Vercel 404s PUT+multipart on dynamic routes; POST works. */
+export async function POST(
+  request: NextRequest,
+  context: { params: { id: string } }
+) {
+  return PUT(request, context);
+}

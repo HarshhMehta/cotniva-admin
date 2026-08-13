@@ -349,11 +349,11 @@ export default function ProductForm({ productEdit }: IProps) {
         }
       });
 
-      const apiUrl = productEdit && productEdit._id
-        ? `/api/product/${productEdit._id}`
-        : "/api/product";
-
-      const method = productEdit && productEdit._id ? "PUT" : "POST";
+      const apiUrl = "/api/product";
+      const method = "POST";
+      if (productEdit && productEdit._id) {
+        formData.append("productId", String(productEdit._id));
+      }
 
       const response = await fetch(apiUrl, {
         method,

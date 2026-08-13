@@ -9,6 +9,7 @@ export async function POST(request: NextRequest) {
   try {
     // Parse form data
     const formData = await request.formData();
+    const productId = String(formData.get("productId") || "").trim();
 
     // Extract basic fields
     const title = formData.get("title") as string;
@@ -30,8 +31,8 @@ export async function POST(request: NextRequest) {
     const bestSeller = formData.get("bestSeller") === "true";
 
     // Extract nested objects (sent as JSON strings)
-    const brand = JSON.parse(formData.get("brand") as string);
-    const category = JSON.parse(formData.get("category") as string);
+    const brand = JSON.parse((formData.get("brand") as string) || "{}");
+    const category = JSON.parse((formData.get("category") as string) || "{}");
     const offerDate = JSON.parse(formData.get("offerDate") as string || "{}");
     const tags = JSON.parse(formData.get("tags") as string || "[]");
     const additionalInformation = JSON.parse(
@@ -102,13 +103,13 @@ export async function POST(request: NextRequest) {
       imageURLs[0].isDefault = true;
     }
 
-    const sizes = JSON.parse(formData.get("sizes") as string || "[]");
-    const sizeInventory = JSON.parse(formData.get("sizeInventory") as string || "[]");
+    const sizes = JSON.parse((formData.get("sizes") as string) || "[]");
+    const sizeInventoryRaw = formData.get("sizeInventory");
     const sizeGuideRaw = formData.get("sizeGuide") as string;
     const sizeGuide = sizeGuideRaw && sizeGuideRaw !== "null" ? sizeGuideRaw : null;
 
     // Prepare product payload for external server
-    const productPayload = {
+    const productPayload: Record<string, unknown> = {
       sku: sku || "",
       title,
       slug: title.toLowerCase().replace(/\s+/g, "-"),
@@ -136,7 +137,6 @@ export async function POST(request: NextRequest) {
       additionalInformation,
       tags,
       sizes,
-      sizeInventory,
       sizeGuide,
       offerDate: {
         startDate: offerDate?.startDate || null,
@@ -147,16 +147,30 @@ export async function POST(request: NextRequest) {
       bestSeller,
     };
 
-    // console.log(productPayload,'productPayload');
+    if (productId) {
+      if (sizeInventoryRaw != null && String(sizeInventoryRaw) !== "") {
+        productPayload.sizeInventory = JSON.parse(String(sizeInventoryRaw) || "[]");
+      }
+    } else {
+      productPayload.sizeInventory = JSON.parse(
+        String(sizeInventoryRaw || "[]")
+      );
+    }
 
-    // Send to external server
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/product/add`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(productPayload),
-    });
+    const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL;
+    const isEdit = Boolean(productId);
+    const response = await fetch(
+      isEdit
+        ? `${apiBase}/api/product/edit-product/${productId}`
+        : `${apiBase}/api/product/add`,
+      {
+        method: isEdit ? "PATCH" : "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(productPayload),
+      }
+    );
 
     const result = await response.json();
 
@@ -164,7 +178,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          message: result.message || "Failed to create product",
+          message: result.message || (isEdit ? "Failed to update product" : "Failed to create product"),
           errors: result.errors,
         },
         { status: response.status }
@@ -175,10 +189,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         success: true,
-        message: "Product created successfully",
+        message: isEdit ? "Product updated successfully" : "Product created successfully",
         data: result.data,
       },
-      { status: 201 }
+      { status: isEdit ? 200 : 201 }
     );
   } catch (error: any) {
     console.error("Error creating product:", error);
