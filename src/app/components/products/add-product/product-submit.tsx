@@ -446,7 +446,7 @@ export default function ProductForm({ productEdit }: IProps) {
 
             <div>
               <label className="block font-medium text-gray-700 mb-1.5">
-                Price <span className="text-red">*</span>
+                Price (₹) <span className="text-red">*</span>
               </label>
               <input
                 type="number"

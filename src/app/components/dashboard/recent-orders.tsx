@@ -48,10 +48,10 @@ const RecentOrders = () => {
   }
   return (
     <>
-      <div className="grid grid-cols-12 gap-6 mb-6">
-        <div className="bg-white p-8 col-span-12 xl:col-span-12 2xl:col-span-12 rounded-md">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="font-medium tracking-wide text-slate-700 text-lg mb-0 leading-none">
+      <div className="grid grid-cols-12 gap-4 mb-5">
+        <div className="bg-white p-4 sm:p-5 col-span-12 xl:col-span-12 2xl:col-span-12 rounded-md">
+          <div className="flex justify-between items-center mb-3">
+            <h3 className="font-medium tracking-wide text-slate-700 text-base mb-0 leading-none">
               Recent Orders
             </h3>
             <a

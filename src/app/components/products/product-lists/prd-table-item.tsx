@@ -5,6 +5,7 @@ import { IProduct } from "@/types/product-type";
 import { Rating } from "react-simple-star-rating";
 import EditDeleteBtn from "../../button/edit-delete-btn";
 import { getDefaultVariant } from "@/utils/utils";
+import { formatINR } from "@/utils/format-inr";
 
 const ProductTableItem = ({ product }: { product: IProduct }) => {
   const {_id, img, title, sku, price, reviews, status, quantity,imageURLs } = product || {};
@@ -36,7 +37,7 @@ const ProductTableItem = ({ product }: { product: IProduct }) => {
         {quantity}
       </td>
       <td className="px-3 py-3 font-normal text-[#55585B] text-end">
-        ${price}
+        {formatINR(price)}
       </td>
       <td className="px-3 py-3 font-normal text-heading text-end">
         <div className="flex justify-end items-center space-x-1 text-tiny">

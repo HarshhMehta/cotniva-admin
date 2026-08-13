@@ -56,28 +56,28 @@ const Header = ({ setSideMenu }: IProps) => {
 
   return (
     <>
-      <header className="relative z-10 bg-white border-b border-gray border-solid py-3 sm:py-5 px-4 sm:px-8">
+      <header className="relative z-10 bg-white border-b border-gray border-solid py-2.5 px-4 sm:px-5">
         <div className="flex justify-between items-center gap-3">
           <div className="flex items-center space-x-4 lg:space-x-0 min-w-0">
             <button
               onClick={() => setSideMenu((prev) => !prev)}
               type="button"
-              className="block lg:hidden text-2xl text-black shrink-0"
+              className="block lg:hidden text-xl text-black shrink-0"
             >
               <Menu />
             </button>
             <div className="md:hidden min-w-0">
-              <BrandLogo className="h-8 max-w-[120px]" />
+              <BrandLogo className="h-7 max-w-[110px]" />
             </div>
             <div className="w-[30%] hidden md:block">
               <form action="#">
-                <div className="w-[250px] relative">
+                <div className="w-[220px] relative">
                   <input
-                    className="input h-12 w-full pr-[45px]"
+                    className="input h-9 w-full pr-[40px] text-sm"
                     type="text"
                     placeholder="Search Here..."
                   />
-                  <button className="absolute top-1/2 right-6 translate-y-[-50%] hover:text-theme">
+                  <button className="absolute top-1/2 right-4 translate-y-[-50%] hover:text-theme">
                     <Search />
                   </button>
                 </div>

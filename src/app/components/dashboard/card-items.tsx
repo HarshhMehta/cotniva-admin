@@ -7,6 +7,7 @@ import isToday from "dayjs/plugin/isToday";
 import isYesterday from "dayjs/plugin/isYesterday";
 import isBetween from "dayjs/plugin/isBetween";
 import ErrorMsg from "../common/error-msg";
+import { formatINR } from "@/utils/format-inr";
 dayjs.extend(isToday, isYesterday);
 dayjs.extend(isBetween);
 
@@ -22,20 +23,20 @@ type IPropType = {
 
 function CardItem({ title, amount, cash, card, icon, clr, clr2 }: IPropType) {
   return (
-    <div className="widget-item bg-white p-6 flex justify-between rounded-md">
+    <div className="widget-item bg-white p-4 flex justify-between rounded-md">
       <div>
-        <h4 className="text-xl font-semibold text-slate-700 mb-1 leading-none">
-          {amount && amount.toFixed(2)}
+        <h4 className="text-lg font-semibold text-slate-700 mb-1 leading-none">
+          {amount != null ? formatINR(amount) : "—"}
         </h4>
-        <p className="text-tiny leading-4">{title}</p>
+        <p className="text-tiny leading-4 mb-0">{title}</p>
         {(title === "Today Orders" || title === "Yesterday Orders") && (
-          <div className={`badge space-x-1 ${clr}`}>
+          <div className={`badge space-x-1 mt-1.5 ${clr}`}>
             <div className="flex text-center font-normal text-gray-50">
               {cash !== undefined && (
-                <div className="px-1">Cash: {cash.toFixed(2)}</div>
+                <div className="px-1">Cash: {formatINR(cash)}</div>
               )}
               {card !== undefined && (
-                <div className="px-1">Card: {card.toFixed(2)}</div>
+                <div className="px-1">Card: {formatINR(card)}</div>
               )}
             </div>
           </div>
@@ -43,7 +44,7 @@ function CardItem({ title, amount, cash, card, icon, clr, clr2 }: IPropType) {
       </div>
       <div>
         <span
-          className={`text-lg text-white rounded-full flex items-center justify-center h-12 w-12 shrink-0 ${clr2}`}
+          className={`text-base text-white rounded-full flex items-center justify-center h-9 w-9 shrink-0 ${clr2}`}
         >
           {icon}
         </span>

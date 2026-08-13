@@ -79,11 +79,9 @@ export default function Sidebar({sideMenu,setSideMenu}:IProps) {
                         </span>
                         {menu.title}
 
-                        {menu.subMenus && (
-                          <span className="absolute right-4 top-[52%] transition-transform duration-300 origin-center w-4 h-4">
-                            <DownArrow />
-                          </span>
-                        )}
+                        <span className={`absolute right-4 top-[52%] transition-transform duration-300 origin-center w-4 h-4 ${isDropdown === menu.title ? "rotate-180" : ""}`}>
+                          <DownArrow />
+                        </span>
                       </a>
                     )}
                     {menu.title === 'Online store' && (

@@ -192,7 +192,7 @@ const OrderTable = () => {
                 ].map((h) => (
                   <th
                     key={h}
-                    className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500"
+                    className="px-3 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-slate-500"
                   >
                     {h}
                   </th>
@@ -209,7 +209,7 @@ const OrderTable = () => {
                     key={item._id}
                     className="border-b border-slate-100 hover:bg-slate-50/70 transition-colors"
                   >
-                    <td className="px-4 py-3.5">
+                    <td className="px-3 py-2.5">
                       <button
                         type="button"
                         onClick={() => setDrawerId(item._id)}
@@ -218,44 +218,44 @@ const OrderTable = () => {
                         #{item.invoice}
                       </button>
                     </td>
-                    <td className="px-4 py-3.5">
-                      <div className="flex items-center gap-3 min-w-[160px]">
+                    <td className="px-3 py-2.5">
+                      <div className="flex items-center gap-2.5 min-w-[160px]">
                         {avatar ? (
                           <Image
                             src={avatar}
                             alt=""
-                            width={36}
-                            height={36}
+                            width={32}
+                            height={32}
                             className="rounded-full object-cover"
                           />
                         ) : (
-                          <span className="w-9 h-9 rounded-full bg-[#4a1f1a]/10 text-[#4a1f1a] text-xs font-semibold flex items-center justify-center">
+                          <span className="w-8 h-8 rounded-full bg-[#4a1f1a]/10 text-[#4a1f1a] text-xs font-semibold flex items-center justify-center">
                             {customerName(item).slice(0, 1).toUpperCase()}
                           </span>
                         )}
                         <div className="min-w-0">
-                          <p className="text-sm font-medium text-slate-900 truncate">
+                          <p className="text-sm font-medium text-slate-900 truncate mb-0">
                             {customerName(item)}
                           </p>
-                          <p className="text-[11px] text-slate-400 truncate">
+                          <p className="text-[11px] text-slate-400 truncate mb-0">
                             {item.email || "—"}
                           </p>
                         </div>
                       </div>
                     </td>
-                    <td className="px-4 py-3.5 text-sm text-slate-700 whitespace-nowrap">
+                    <td className="px-3 py-2.5 text-sm text-slate-700 whitespace-nowrap">
                       {item.contact || "—"}
                     </td>
-                    <td className="px-4 py-3.5 text-sm text-slate-700">
+                    <td className="px-3 py-2.5 text-sm text-slate-700">
                       {qtyOf(item)}{" "}
                       <span className="text-slate-400">
                         ({item.cart?.length || 0} SKU)
                       </span>
                     </td>
-                    <td className="px-4 py-3.5 text-sm font-semibold text-slate-900 whitespace-nowrap">
+                    <td className="px-3 py-2.5 text-sm font-semibold text-slate-900 whitespace-nowrap">
                       {inr(item.totalAmount)}
                     </td>
-                    <td className="px-4 py-3.5">
+                    <td className="px-3 py-2.5">
                       <div className="flex flex-col gap-1 items-start">
                         <span
                           className={`text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full ${pay.methodCls}`}
@@ -269,7 +269,7 @@ const OrderTable = () => {
                         </span>
                       </div>
                     </td>
-                    <td className="px-4 py-3.5">
+                    <td className="px-3 py-2.5">
                       <span
                         className={`text-[11px] font-semibold capitalize px-2.5 py-1 rounded-full ${statusCls(
                           item.status
@@ -278,13 +278,13 @@ const OrderTable = () => {
                         {item.status}
                       </span>
                     </td>
-                    <td className="px-4 py-3.5 text-sm text-slate-600 whitespace-nowrap">
+                    <td className="px-3 py-2.5 text-sm text-slate-600 whitespace-nowrap">
                       {dayjs(item.createdAt).format("MMM D, YYYY")}
                       <div className="text-[11px] text-slate-400">
                         {dayjs(item.createdAt).format("h:mm A")}
                       </div>
                     </td>
-                    <td className="px-4 py-3.5">
+                    <td className="px-3 py-2.5">
                       <div className="flex items-center gap-2">
                         <button
                           type="button"

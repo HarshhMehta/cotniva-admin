@@ -5,6 +5,7 @@ import { Delete, Edit } from "@/svg";
 import { IOrder } from "@/types/order-amount-type";
 import OrderActions from "../orders/order-actions";
 import OrderStatusChange from "../orders/status-change";
+import { formatINR } from "@/utils/format-inr";
 
 const TableItem = (props: { order: IOrder }) => {
   const { order } = props;
@@ -22,7 +23,7 @@ const TableItem = (props: { order: IOrder }) => {
       </td>
       <td className="px-3 py-3">{order.name}</td>
       <td className="px-3 py-3">{p_method}</td>
-      <td className="px-3 py-3">${order.totalAmount}</td>
+      <td className="px-3 py-3">{formatINR(order.totalAmount)}</td>
       <td className="px-3 py-3">
         <span
           className={`text-[11px] px-3 py-1 rounded-md leading-none ${

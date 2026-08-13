@@ -1,6 +1,7 @@
 import React from "react";
 import { Order } from "@/types/order-amount-type";
 import dayjs from "dayjs";
+import { formatINR } from "@/utils/format-inr";
 
 // prop type
 type IPropType = {
@@ -67,7 +68,7 @@ const InvoicePrint = ({ orderData }: IPropType) => {
                         {p.orderQuantity}
                       </td>
                       <td className="px-3 py-3 font-normal text-[#55585B] text-end">
-                        ${(p.orderQuantity * p.price).toFixed(2)}
+                        {formatINR(p.orderQuantity * p.price)}
                       </td>
                     </tr>
                   ))}
@@ -86,7 +87,7 @@ const InvoicePrint = ({ orderData }: IPropType) => {
                       Subtotal
                     </td>
                     <td className="px-3 py-3 pt-6 font-normal text-[#55585B] text-end">
-                      ${total.toFixed(2)}
+                      {formatINR(total)}
                     </td>
                   </tr>
                   <tr className="bg-white border-b border-gray6 last:border-0 text-start mx-9">
@@ -94,7 +95,7 @@ const InvoicePrint = ({ orderData }: IPropType) => {
                       Shipping cost:
                     </td>
                     <td className="px-3 py-3 font-normal text-[#55585B] text-end">
-                      ${orderData.shippingCost.toFixed(2)}
+                      {formatINR(orderData.shippingCost)}
                     </td>
                   </tr>
                   <tr className="bg-white border-b border-gray6 last:border-0 text-start mx-9">
@@ -102,7 +103,7 @@ const InvoicePrint = ({ orderData }: IPropType) => {
                       Grand total:
                     </td>
                     <td className="px-3 py-3 text-[#55585B] text-end text-lg font-semibold">
-                      ${grand_total.toFixed(2)}
+                      {formatINR(grand_total)}
                     </td>
                   </tr>
                 </tbody>

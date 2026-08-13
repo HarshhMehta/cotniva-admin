@@ -8,8 +8,8 @@
  @layer base {
      html, body {
          font-family: 'Poppins', sans-serif;
-         font-size: 14px;
-         line-height: 26px;
+         font-size: 13px;
+         line-height: 1.5;
          color: #55585B;
     }
      img, svg{
@@ -18,34 +18,34 @@
      h1, h2, h3, h4, h5, h6{
          font-family: 'Poppins', sans-serif;
          font-weight: 500;
-         line-height: 1.2;
-         margin-bottom: 15px;
+         line-height: 1.25;
+         margin-bottom: 10px;
          color: #010F1C;
     }
      h1 {
-         font-size: 40px;
+         font-size: 26px;
     }
      h2 {
-         font-size: 36px;
+         font-size: 22px;
     }
      h3 {
-         font-size: 24px;
+         font-size: 18px;
     }
      h4 {
-         font-size: 20px;
-    }
-     h5 {
          font-size: 16px;
     }
-     h6 {
+     h5 {
          font-size: 14px;
+    }
+     h6 {
+         font-size: 13px;
     }
      p{
          font-family: 'Poppins', sans-serif;
-         font-size: 14px;
-         line-height: 26px;
+         font-size: 13px;
+         line-height: 1.5;
          color: #55585B;
-         margin-bottom: 15px;
+         margin-bottom: 10px;
     }
      a, .btn, p, button, input, select, textarea, li, img, .transition-3, h1, h2, h3, h4, h5, h6 {
          -webkit-transition: all .3s ease-out 0s;
@@ -63,7 +63,7 @@
          @apply -translate-y-[2px];
     }
      .input{
-         @apply bg-white px-6 outline-none focus-within:outline-none focus-visible:outline-none rounded-md border border-gray focus:border-theme focus:bg-white text-tiny;
+         @apply bg-white px-4 outline-none focus-within:outline-none focus-visible:outline-none rounded-md border border-gray focus:border-theme focus:bg-white text-tiny;
     }
      .nav-dot{
          @apply relative px-4 pl-[12px] after:absolute after:top-[11px] after:left-0 after:w-[3px] after:h-[3px] after:rounded-full after:bg-[#6D6F71] after:content-[''];
@@ -119,9 +119,37 @@ input[type=number] {
 }
 .tp-main-content {
     min-width: 0;
+    max-width: 100%;
 }
 .body-content {
     min-width: 0;
+    max-width: 100%;
+}
+
+/* Right content density only — no zoom (avoids sidebar overlap) */
+@media (min-width: 1024px) {
+    .body-content {
+        padding-left: 1.25rem !important;
+        padding-right: 1.25rem !important;
+        padding-top: 1.25rem !important;
+        padding-bottom: 1.25rem !important;
+    }
+    .tp-search-box {
+        padding-left: 1.25rem !important;
+        padding-right: 1.25rem !important;
+        padding-top: 1rem !important;
+        padding-bottom: 1rem !important;
+    }
+    .widget-item {
+        padding: 1rem !important;
+    }
+    .chart-single,
+    .chart-widget {
+        padding-left: 1.25rem !important;
+        padding-right: 1.25rem !important;
+        padding-top: 1.25rem !important;
+        padding-bottom: 1.25rem !important;
+    }
 }
 
 @media (max-width: 767px) {

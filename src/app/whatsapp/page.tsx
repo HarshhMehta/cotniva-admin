@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import Wrapper from "@/layout/wrapper";
 import { notifyError, notifySuccess } from "@/utils/toast";
 
@@ -9,8 +9,10 @@ export default function WhatsAppPage() {
   const [status, setStatus] = useState("disconnected");
   const [qr, setQr] = useState<string | null>(null);
   const [number, setNumber] = useState<string | null>(null);
+  const [sessionTakenElsewhere, setSessionTakenElsewhere] = useState(false);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
+  const startedRef = useRef(false);
 
   const fetchStatus = useCallback(async () => {
     try {
@@ -20,6 +22,7 @@ export default function WhatsAppPage() {
         setStatus(data.data.status);
         setQr(data.data.qr || null);
         setNumber(data.data.number || null);
+        setSessionTakenElsewhere(Boolean(data.data.sessionTakenElsewhere));
       }
     } catch {
       // silent poll errors
@@ -28,11 +31,52 @@ export default function WhatsAppPage() {
     }
   }, []);
 
+  const connectSession = useCallback(async () => {
+    setBusy(true);
+    setLoading(true);
+    try {
+      const res = await fetch(`${API}/api/whatsapp/connect`, {
+        method: "POST",
+      });
+      const data = await res.json();
+      if (data.success) {
+        setStatus(data.data.status);
+        setQr(data.data.qr || null);
+        setNumber(data.data.number || null);
+        setSessionTakenElsewhere(Boolean(data.data.sessionTakenElsewhere));
+      } else {
+        notifyError("Could not start WhatsApp connection");
+      }
+    } catch {
+      notifyError("Something went wrong");
+    } finally {
+      setBusy(false);
+      setLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     fetchStatus();
-    const id = setInterval(fetchStatus, 2500);
+    const id = setInterval(fetchStatus, 3000);
     return () => clearInterval(id);
   }, [fetchStatus]);
+
+  // One connect attempt on open only if idle (not after 440 / replaced)
+  useEffect(() => {
+    if (startedRef.current || loading) return;
+    if (
+      status === "connected" ||
+      status === "qr" ||
+      status === "connecting" ||
+      status === "replaced" ||
+      sessionTakenElsewhere
+    ) {
+      startedRef.current = true;
+      return;
+    }
+    startedRef.current = true;
+    connectSession();
+  }, [loading, status, sessionTakenElsewhere, connectSession]);
 
   const handleLogout = async () => {
     setBusy(true);
@@ -44,6 +88,8 @@ export default function WhatsAppPage() {
         setStatus("disconnected");
         setQr(null);
         setNumber(null);
+        setSessionTakenElsewhere(false);
+        startedRef.current = false;
         setTimeout(fetchStatus, 800);
       } else {
         notifyError("Failed to disconnect");
@@ -55,18 +101,12 @@ export default function WhatsAppPage() {
     }
   };
 
-  const handleRefresh = async () => {
-    setBusy(true);
-    setLoading(true);
-    await fetchStatus();
-    setBusy(false);
-  };
-
   const statusLabel: Record<string, string> = {
     connected: "Connected",
     qr: "Scan QR Code",
     connecting: "Connecting...",
     disconnected: "Disconnected",
+    replaced: "Taken by another server",
   };
 
   const statusColor: Record<string, string> = {
@@ -74,6 +114,7 @@ export default function WhatsAppPage() {
     qr: "bg-amber-100 text-amber-800",
     connecting: "bg-themeLight text-theme",
     disconnected: "bg-gray-100 text-gray-700",
+    replaced: "bg-red-100 text-red-800",
   };
 
   return (
@@ -103,10 +144,17 @@ export default function WhatsAppPage() {
             )}
           </div>
 
+          {(sessionTakenElsewhere || status === "replaced") && (
+            <div className="mb-4 p-3 rounded-md bg-red-50 border border-red-200 text-xs text-red-800 leading-relaxed">
+              Another client took this WhatsApp session (code 440). Close WhatsApp
+              Web / other servers, wait 10 seconds, then click Connect once.
+            </div>
+          )}
+
           <div className="mb-6 flex justify-center">
             {loading && !qr && status !== "connected" ? (
               <div className="w-[280px] h-[280px] flex items-center justify-center border border-dashed border-gray-300 rounded-md text-sm text-gray-500">
-                Loading QR...
+                Loading…
               </div>
             ) : status === "connected" ? (
               <div className="w-[280px] h-[280px] flex flex-col items-center justify-center border border-green-200 bg-green-50 rounded-md text-center px-4">
@@ -126,19 +174,19 @@ export default function WhatsAppPage() {
               />
             ) : (
               <div className="w-[280px] h-[280px] flex items-center justify-center border border-dashed border-gray-300 rounded-md text-sm text-gray-500 text-center px-4">
-                Click Refresh to generate QR code
+                Click Connect to start WhatsApp
               </div>
             )}
           </div>
 
-          <div className="flex gap-3">
+          <div className="flex gap-3 flex-wrap">
             <button
               type="button"
-              onClick={handleRefresh}
-              disabled={busy}
+              onClick={connectSession}
+              disabled={busy || status === "connected" || status === "connecting"}
               className="tp-btn px-5 py-2 bg-theme text-white rounded text-sm disabled:opacity-60"
             >
-              Refresh QR
+              {status === "qr" ? "Refresh QR" : "Connect"}
             </button>
             <button
               type="button"
@@ -151,13 +199,17 @@ export default function WhatsAppPage() {
           </div>
 
           <div className="mt-8 p-4 bg-slate-50 rounded text-xs text-gray-600 leading-relaxed">
-            <strong className="block mb-1">How it works</strong>
+            <strong className="block mb-1">Important</strong>
+            Run WhatsApp on <em>only one</em> backend at a time (local OR
+            production). Two servers with the same number cause endless
+            connect/disconnect (error 440).
+            <br />
+            <br />
             1. Scan the QR using the business WhatsApp number.
             <br />
-            2. Keep the backend server running so the session stays alive.
+            2. Keep that one backend running so the session stays alive.
             <br />
-            3. Customers enter their mobile number on the store → OTP is sent on
-            WhatsApp → they verify and log in.
+            3. Customers enter mobile → OTP on WhatsApp → login.
           </div>
         </div>
       </div>

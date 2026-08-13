@@ -6,11 +6,11 @@ import RecentOrders from "../components/dashboard/recent-orders";
 export default function DashboardPage() {
   return (
     <Wrapper>
-      <div className="body-content px-4 sm:px-8 py-6 sm:py-8 bg-slate-100">
+      <div className="body-content px-4 sm:px-5 py-5 bg-slate-100">
         <div className="flex justify-between items-end flex-wrap">
-          <div className="page-title mb-7">
-            <h3 className="mb-0 text-4xl">Dashboard</h3>
-            <p className="text-textBody m-0">
+          <div className="page-title mb-4">
+            <h3 className="mb-0 text-2xl font-semibold">Dashboard</h3>
+            <p className="text-textBody text-sm m-0">
               Cotniva store overview — sales, categories and recent orders
             </p>
           </div>

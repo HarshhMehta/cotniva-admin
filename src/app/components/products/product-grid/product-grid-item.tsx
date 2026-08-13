@@ -5,6 +5,7 @@ import { Rating } from "react-simple-star-rating";
 import { IProduct } from "@/types/product-type";
 import ProductGridAction from "./product-grid-action";
 import { getDefaultVariant } from "@/utils/utils";
+import { formatINR } from "@/utils/format-inr";
 
 const ProductGridItem = ({ product }: { product: IProduct }) => {
   const { _id,img, title, sku, price, reviews, status, quantity,imageURLs } = product || {};
@@ -51,7 +52,7 @@ const ProductGridItem = ({ product }: { product: IProduct }) => {
         </div>
         <div className="leading-none mb-2">
           <span className="text-base font-medium text-black">
-            ${price.toFixed(2)}
+            {formatINR(price)}
           </span>
         </div>
       </div>

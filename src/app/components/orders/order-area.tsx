@@ -52,7 +52,7 @@ const OrderArea = () => {
             <p className="text-[11px] uppercase tracking-[0.12em] text-slate-400 font-semibold">
               {card.label}
             </p>
-            <p className="text-xl font-semibold text-slate-900 mt-1">
+            <p className="text-lg font-semibold text-slate-900 mt-0.5 mb-0">
               {card.value}
             </p>
           </div>

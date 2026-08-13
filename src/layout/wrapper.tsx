@@ -17,7 +17,7 @@ const Wrapper = ({ children }: { children: React.ReactNode }) => {
   return (
     <div className="tp-main-wrapper bg-slate-100 min-h-screen overflow-x-hidden">
       <Sidebar sideMenu={sideMenu} setSideMenu={setSideMenu} />
-      <div className="tp-main-content lg:ml-[250px] xl:ml-[300px] w-full min-w-0">
+      <div className="tp-main-content w-full min-w-0 lg:ml-[250px] lg:w-[calc(100%-250px)] xl:ml-[300px] xl:w-[calc(100%-300px)]">
         {/* header start */}
         <Header setSideMenu={setSideMenu} />
         {/* header end */}

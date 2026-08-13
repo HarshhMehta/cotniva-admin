@@ -8,6 +8,7 @@ import { Invoice } from "@/svg";
 import { useReactToPrint } from "react-to-print";
 import { notifyError } from "@/utils/toast";
 import { getOrderCustomerName } from "@/types/order-amount-type";
+import { formatINR } from "@/utils/format-inr";
 
 const OrderDetailsArea = ({ id }: { id: string }) => {
   const { data: orderData, isLoading, isError } = useGetSingleOrderQuery(id);
@@ -130,10 +131,10 @@ const OrderDetailsArea = ({ id }: { id: string }) => {
                             {item.orderQuantity}
                           </td>
                           <td className="bg-white border-b border-gray6 px-3 py-3 font-bold text-center">
-                            ${item.price.toFixed(2)}
+                            {formatINR(item.price)}
                           </td>
                           <td className="bg-white border-b border-gray6 px-3 py-3 text-right font-bold">
-                            ${(item.price * item.orderQuantity).toFixed(2)}
+                            {formatINR(item.price * item.orderQuantity)}
                           </td>
                         </tr>
                       ))}
@@ -157,7 +158,7 @@ const OrderDetailsArea = ({ id }: { id: string }) => {
                     SHIPPING COST
                   </span>
                   <span className="text-base font-semibold font-heading block">
-                    ${orderData.shippingCost}
+                    {formatINR(orderData.shippingCost)}
                   </span>
                 </div>
                 <div className="mb-3 md:mb-0 lg:mb-0  flex flex-col sm:flex-wrap">
@@ -165,7 +166,7 @@ const OrderDetailsArea = ({ id }: { id: string }) => {
                     DISCOUNT
                   </span>
                   <span className="text-base text-gray-500 font-semibold font-heading block">
-                    ${orderData?.discount}
+                    {formatINR(orderData?.discount)}
                   </span>
                 </div>
                 <div className="flex flex-col sm:flex-wrap">
@@ -173,7 +174,7 @@ const OrderDetailsArea = ({ id }: { id: string }) => {
                     TOTAL AMOUNT
                   </span>
                   <span className="text-xl font-bold block">
-                    ${grand_total.toFixed(2)}
+                    {formatINR(grand_total)}
                   </span>
                 </div>
               </div>
