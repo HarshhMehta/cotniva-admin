@@ -55,8 +55,8 @@ const RecentOrders = () => {
               Recent Orders
             </h3>
             <a
-              href="order-list.html"
-              className="leading-none text-base text-info border-b border-info border-dotted capitalize font-medium hover:text-info/60 hover:border-info/60"
+              href="/orders"
+              className="leading-none text-base text-theme border-b border-theme border-dotted capitalize font-medium hover:text-theme/60 hover:border-theme/60"
             >
               View All
             </a>

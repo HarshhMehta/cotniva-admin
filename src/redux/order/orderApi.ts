@@ -28,7 +28,7 @@ export const authApi = apiSlice.injectEndpoints({
     getMostSellingCategory: builder.query<IMostSellingCategory, void>({
       query: () => `/api/user-order/most-selling-category`,
       providesTags: ["DashboardMostSellingCategory"],
-      keepUnusedDataFor: 600,
+      keepUnusedDataFor: 60,
     }),
     // get recent orders
     getRecentOrders: builder.query<IDashboardRecentOrders, void>({

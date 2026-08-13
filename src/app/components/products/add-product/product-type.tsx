@@ -15,10 +15,10 @@ type Props = {
 };
 
 const options = [
-  { value: "electronics", label: "Electronics" },
-  { value: "fashion", label: "Fashion" },
-  { value: "beauty", label: "Beauty" },
-  { value: "jewelry", label: "Jewelry" },
+  { value: "clothing", label: "Clothing" },
+  { value: "accessories", label: "Accessories" },
+  { value: "footwear", label: "Footwear" },
+  { value: "general", label: "General" },
 ];
 
 export default function ProductTypeSelect({
@@ -122,10 +122,10 @@ export const ProductTypeTwo = ({
               handleSelectProduct(selectedOption?.value);
             }}
             options={[
-              { value: "electronics", label: "Electronics" },
-              { value: "fashion", label: "Fashion" },
-              { value: "beauty", label: "Beauty" },
-              { value: "jewelry", label: "Jewelry" },
+              { value: "clothing", label: "Clothing" },
+              { value: "accessories", label: "Accessories" },
+              { value: "footwear", label: "Footwear" },
+              { value: "general", label: "General" },
             ]}
           />
         )}

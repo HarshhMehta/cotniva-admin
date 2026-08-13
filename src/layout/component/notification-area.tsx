@@ -205,7 +205,7 @@ const NotificationArea = ({
       <button
         type="button"
         onClick={openPanel}
-        className={`relative w-[40px] h-[40px] leading-[40px] rounded-md text-gray border border-gray hover:bg-themeLight hover:text-theme hover:border-themeLight ${
+        className={`relative inline-flex items-center justify-center w-[40px] h-[40px] rounded-md text-textBody border border-gray2 bg-white hover:bg-themeLight hover:text-theme hover:border-themeLight ${
           ringing && !notificationOpen
             ? "cot-bell-pulse border-danger text-theme"
             : ""
@@ -213,7 +213,7 @@ const NotificationArea = ({
         aria-label="Notifications"
       >
         <span
-          className={`inline-flex ${
+          className={`inline-flex items-center justify-center text-current ${
             ringing && !notificationOpen ? "cot-bell-ringing" : ""
           }`}
         >

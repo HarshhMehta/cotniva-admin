@@ -18,6 +18,9 @@ const SalesReport = () => {
         <div className="col-span-12 md:col-span-6 2xl:col-span-5 space-y-6">
           <div className="chart-widget bg-white p-4 sm:p-10 rounded-md">
             <h3 className="text-xl mb-8">Most Selling Category</h3>
+            <p className="text-tiny text-textBody -mt-6 mb-6">
+              Based on your Cotniva product categories
+            </p>
             {/* <div className="md:h-[252px] 2xl:h-[398px] w-full">
               <canvas
                 className="mx-auto md:!w-[240px] md:!h-[240px] 2xl:!w-[360px] 2xl:!h-[360px] "

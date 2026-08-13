@@ -90,7 +90,7 @@ const Header = ({ setSideMenu }: IProps) => {
               <button
                 type="button"
                 onClick={() => setSearchOverlay(true)}
-                className="relative w-[40px] h-[40px] leading-[40px] rounded-md text-textBody border border-gray hover:bg-themeLight hover:text-theme hover:border-themeLight"
+                className="relative inline-flex items-center justify-center w-[40px] h-[40px] rounded-md text-textBody border border-gray2 hover:bg-themeLight hover:text-theme hover:border-themeLight"
               >
                 <Search />
               </button>

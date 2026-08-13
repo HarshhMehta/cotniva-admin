@@ -1,6 +1,7 @@
 "use client";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useGetAllProductsQuery } from "@/redux/product/productApi";
+import { useGetAllCategoriesQuery } from "@/redux/category/categoryApi";
 import ErrorMsg from "../../common/error-msg";
 import ProductGridItem from "./product-grid-item";
 import Pagination from "../../ui/Pagination";
@@ -9,25 +10,34 @@ import Link from "next/link";
 import usePagination from "@/hooks/use-pagination";
 
 const ProductGridArea = () => {
-  const { data: products, isError, isLoading } = useGetAllProductsQuery(undefined,{
-    refetchOnMountOrArgChange: true,
-  });
+  const { data: products, isError, isLoading } = useGetAllProductsQuery(
+    undefined,
+    {
+      refetchOnMountOrArgChange: true,
+    }
+  );
+  const { data: categoriesRes } = useGetAllCategoriesQuery();
   const paginationData = usePagination(products?.data || [], 10);
   const { currentItems, handlePageClick, pageCount } = paginationData;
   const [searchValue, setSearchValue] = useState<string>("");
   const [selectValue, setSelectValue] = useState<string>("");
 
-  // search field
+  const categoryOptions = useMemo(() => {
+    const list = categoriesRes?.result || [];
+    const names = Array.from(
+      new Set(list.map((c) => c.parent).filter(Boolean))
+    ).sort((a, b) => a.localeCompare(b));
+    return names;
+  }, [categoriesRes]);
+
   const handleSearchProduct = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchValue(e.target.value);
   };
 
-  // handle select input
   const handleSelectField = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectValue(e.target.value);
   };
 
-  // decide what to render
   let content = null;
 
   if (isLoading) {
@@ -41,9 +51,8 @@ const ProductGridArea = () => {
   }
 
   if (!isLoading && !isError && products?.success) {
-    let productItems =[...currentItems];
+    let productItems = [...currentItems];
 
-    // search field
     if (searchValue) {
       productItems = productItems.filter((p) =>
         p.title.toLowerCase().includes(searchValue.toLowerCase())
@@ -51,7 +60,18 @@ const ProductGridArea = () => {
     }
 
     if (selectValue) {
-      productItems = productItems.filter((p) => p.productType === selectValue);
+      productItems = productItems.filter((p) => {
+        const catName =
+          (p as { category?: { name?: string; parent?: string } }).category
+            ?.name ||
+          (p as { category?: { name?: string; parent?: string } }).category
+            ?.parent ||
+          "";
+        return (
+          catName === selectValue ||
+          p.productType === selectValue
+        );
+      });
     }
 
     content = (
@@ -64,11 +84,9 @@ const ProductGridArea = () => {
           </div>
         </div>
 
-        {/* bottom  */}
         <div className="flex justify-between items-center flex-wrap mx-8">
           <p className="mb-0 text-tiny">
-            Showing {currentItems.length} of{" "}
-            {products?.data.length}
+            Showing {currentItems.length} of {products?.data.length}
           </p>
           <div className="pagination py-3 flex justify-end items-center mx-8 pagination">
             <Pagination
@@ -82,7 +100,7 @@ const ProductGridArea = () => {
   }
   return (
     <div className="bg-white rounded-t-md rounded-b-md shadow-xs py-4">
-      <div className="tp-search-box flex items-center justify-between px-8 py-8 flex-wrap">
+      <div className="tp-search-box flex items-center justify-between px-8 py-8 flex-wrap gap-4">
         <div className="search-input relative">
           <input
             onChange={handleSearchProduct}
@@ -90,22 +108,30 @@ const ProductGridArea = () => {
             type="text"
             placeholder="Search by product name"
           />
-          <button className="absolute top-1/2 left-5 translate-y-[-50%] hover:text-theme">
+          <button
+            type="button"
+            className="absolute top-1/2 left-5 translate-y-[-50%] hover:text-theme"
+          >
             <Search />
           </button>
         </div>
-        <div className="flex sm:justify-end sm:space-x-6 flex-wrap">
+        <div className="flex sm:justify-end sm:space-x-6 flex-wrap gap-3">
           <div className="search-select mr-3 flex items-center space-x-3 ">
             <span className="text-tiny inline-block leading-none -translate-y-[2px]">
               Categories :{" "}
             </span>
-            <select onChange={handleSelectField}>
-                <option value="">Categories</option>
-                <option value="electronics">Electronics</option>
-                <option value="fashion">Fashion</option>
-                <option value="beauty">beauty</option>
-                <option value="jewelry">jewelry</option>
-              </select>
+            <select
+              onChange={handleSelectField}
+              value={selectValue}
+              className="h-[40px] rounded-md border border-gray6 px-3 bg-white text-base"
+            >
+              <option value="">All categories</option>
+              {categoryOptions.map((name) => (
+                <option key={name} value={name}>
+                  {name}
+                </option>
+              ))}
+            </select>
           </div>
           <div className="product-add-btn flex ">
             <Link href="/add-product" className="tp-btn">
