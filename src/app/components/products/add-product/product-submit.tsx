@@ -52,6 +52,7 @@ export default function ProductForm({ productEdit }: IProps) {
       description: "",
       productHighlights: "",
       fabricCare: "",
+      fitSizing: "",
       youtube_video_Id: "",
       tags: "",
       sizes: "",
@@ -190,6 +191,7 @@ export default function ProductForm({ productEdit }: IProps) {
       description: productEdit.description ?? "",
       productHighlights: productEdit.productHighlights ?? "",
       fabricCare: productEdit.fabricCare ?? "",
+      fitSizing: productEdit.fitSizing ?? "",
       youtube_video_Id: productEdit.videoId ?? "",
       tags: (productEdit.tags ?? []).join(", "),
       sizes: productEdit.sizes ?? "",
@@ -295,6 +297,7 @@ export default function ProductForm({ productEdit }: IProps) {
       formData.append("description", data.description);
       formData.append("productHighlights", data.productHighlights || "");
       formData.append("fabricCare", data.fabricCare || "");
+      formData.append("fitSizing", data.fitSizing || "");
       formData.append("videoId", data.youtube_video_Id || "");
       formData.append("featured", data.featured ? "true" : "false");
 
@@ -715,7 +718,7 @@ export default function ProductForm({ productEdit }: IProps) {
           <div className="border border-gray2 rounded-lg p-4 mb-4">
             <h3 className="text-lg font-semibold text-gray-800 mb-3">Size Guide</h3>
             <p className="text-sm text-gray-500 mb-3">
-              Attach a reusable size chart (create charts under Size Guides in the sidebar).
+              Attach a reusable size chart (create charts under Size Guides in the sidebar). This is the Size Guide popup, separate from the Fit & Sizing accordion text below.
             </p>
             <select
               value={selectedSizeGuide}
@@ -780,6 +783,21 @@ export default function ProductForm({ productEdit }: IProps) {
               rows={4}
               className="input h-[100px] resize-none w-full py-3 text-base"
               placeholder={"Machine wash cold\nDo not bleach\nTumble dry low\nWarm iron if needed"}
+              disabled={isSubmitting}
+            />
+          </div>
+
+          {/* Fit & Sizing — accordion on product page */}
+          <div className="mb-4">
+            <label className="block font-medium mb-1.5">Fit & Sizing</label>
+            <p className="text-xs text-gray-400 mb-2">
+              Shows under buttons → Fit & Sizing accordion on the product page.
+            </p>
+            <textarea
+              {...register("fitSizing")}
+              rows={4}
+              className="input h-[100px] resize-none w-full py-3 text-base"
+              placeholder={"Regular fit\nModel is 5'8\" wearing size M\nIf between sizes, size up"}
               disabled={isSubmitting}
             />
           </div>

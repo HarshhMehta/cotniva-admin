@@ -36,6 +36,7 @@ export async function PUT(
     const description = formData.get("description") as string;
     const productHighlights = (formData.get("productHighlights") as string) || "";
     const fabricCare = (formData.get("fabricCare") as string) || "";
+    const fitSizing = (formData.get("fitSizing") as string) || "";
     const videoId = formData.get("videoId") as string;
     const featured = formData.get("featured") === "true";
     const newArrival = formData.get("newArrival") === "true";
@@ -151,6 +152,7 @@ export async function PUT(
       description,
       productHighlights,
       fabricCare,
+      fitSizing,
       videoId: videoId || "",
       additionalInformation,
       tags,

@@ -160,6 +160,7 @@ export interface ProductFormData {
   description: string;
   productHighlights?: string;
   fabricCare?: string;
+  fitSizing?: string;
   youtube_video_Id?: string;
   tags: string;
   sizes: string;
