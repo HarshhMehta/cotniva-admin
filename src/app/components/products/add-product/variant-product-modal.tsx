@@ -84,7 +84,7 @@ export default function VariantModal({ isOpen, onClose, onSave, editData = null 
                 value={colorName}
                 onChange={(e) => setColorName(e.target.value)}
                 placeholder="e.g. Maroon, Ivory, Black"
-                className="flex-1 px-4 py-2.5 border border-gray2 rounded-lg focus:outline-none focus:border-blue-500"
+                className="flex-1 px-4 py-2.5 border border-gray2 rounded-lg focus:outline-none focus:border-theme"
               />
               <input
                 type="color"
@@ -102,7 +102,7 @@ export default function VariantModal({ isOpen, onClose, onSave, editData = null 
               id="isDefault"
               checked={isDefault}
               onChange={(e) => setIsDefault(e.target.checked)}
-              className="w-4 h-4 text-blue-600 border-gray2 rounded focus:ring-blue-500"
+              className="w-4 h-4 text-theme border-gray2 rounded focus:ring-theme"
             />
             <label htmlFor="isDefault" className="text-gray-700">
               Set as default / main image
@@ -112,7 +112,7 @@ export default function VariantModal({ isOpen, onClose, onSave, editData = null 
 
         <button
           onClick={handleSave}
-          className="mt-6 w-full bg-blue-600 text-white py-2.5 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+          className="mt-6 w-full bg-theme text-white py-2.5 rounded-lg hover:bg-themeDark transition-colors font-medium"
         >
           Save Image
         </button>

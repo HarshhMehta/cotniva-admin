@@ -87,7 +87,7 @@ export default function ProductCategory({
       <select
         value={selectedParentId}
         onChange={handleParentChange}
-        className="w-full h-[44px] rounded-md border border-gray6 px-4 text-base focus:border-blue-500 focus:outline-none bg-white"
+        className="w-full h-[44px] rounded-md border border-gray6 px-4 text-base focus:border-theme focus:outline-none bg-white"
       >
         <option value="">-- Select category --</option>
         {categoryItems.map((cat) => (

@@ -79,7 +79,7 @@ const SliderTable = () => {
                 <td className="px-3 py-3 text-[#55585B] align-middle">{item.order}</td>
                 <td className="px-3 py-3 text-end align-middle">
                   <div className="flex items-center justify-end space-x-2">
-                    <Link href={`/slider/edit/${item._id}`} className="px-3 py-1 text-xs rounded bg-blue-50 text-blue-600 hover:bg-blue-100">Edit</Link>
+                    <Link href={`/slider/edit/${item._id}`} className="px-3 py-1 text-xs rounded bg-themeLight text-theme hover:bg-theme/10">Edit</Link>
                     <button onClick={() => handleDelete(item._id!)} className="px-3 py-1 text-xs rounded bg-red-50 text-red-500 hover:bg-red-100">Delete</button>
                   </div>
                 </td>
@@ -98,7 +98,7 @@ const SliderTable = () => {
   }
 
   return (
-    <div className="relative overflow-x-auto bg-white px-8 py-4 rounded-md">
+    <div className="relative overflow-x-auto bg-white px-4 sm:px-8 py-4 rounded-md">
       {content}
     </div>
   );

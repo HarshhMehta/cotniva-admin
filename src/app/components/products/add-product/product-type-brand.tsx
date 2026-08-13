@@ -79,7 +79,7 @@ export default function BrandSelect({ register, setValue, default_value }: Props
       <select
         value={selectedBrandId}
         onChange={(e) => handleBrandChange(e.target.value)}
-        className="w-full h-[44px] rounded-md border border-gray6 px-4 text-base focus:border-blue-500 bg-white"
+        className="w-full h-[44px] rounded-md border border-gray6 px-4 text-base focus:border-theme bg-white"
       >
         <option value="">-- Select brand --</option>
         {brandItems.map((brand: any) => (

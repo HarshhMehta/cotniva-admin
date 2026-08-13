@@ -72,14 +72,14 @@ export default function WhatsAppPage() {
   const statusColor: Record<string, string> = {
     connected: "bg-green-100 text-green-800",
     qr: "bg-amber-100 text-amber-800",
-    connecting: "bg-blue-100 text-blue-800",
+    connecting: "bg-themeLight text-theme",
     disconnected: "bg-gray-100 text-gray-700",
   };
 
   return (
     <Wrapper>
       <div className="body-content px-8 py-8 bg-slate-100 min-h-screen">
-        <div className="max-w-2xl bg-white px-8 py-8 rounded-md shadow-sm">
+        <div className="max-w-2xl bg-white px-4 sm:px-8 py-6 sm:py-8 rounded-md shadow-sm">
           <h2 className="text-lg font-semibold text-heading mb-2">
             WhatsApp Login (Baileys)
           </h2>

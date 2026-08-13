@@ -407,7 +407,7 @@ export default function ProductForm({ productEdit }: IProps) {
                   minLength: { value: 3, message: "Title must be at least 3 characters" },
                   maxLength: { value: 200, message: "Title is too long" },
                 })}
-                className="input w-full h-[44px] rounded-md border border-gray6 px-6 text-base focus:border-blue-500"
+                className="input w-full h-[44px] rounded-md border border-gray6 px-6 text-base focus:border-theme"
                 placeholder="Enter product title"
                 disabled={isSubmitting}
               />
@@ -420,7 +420,7 @@ export default function ProductForm({ productEdit }: IProps) {
               <label className="block font-medium text-gray-700 mb-1.5">SKU</label>
               <input
                 {...register("sku")}
-                className="input w-full h-[44px] rounded-md border border-gray6 px-6 text-base focus:border-blue-500"
+                className="input w-full h-[44px] rounded-md border border-gray6 px-6 text-base focus:border-theme"
                 placeholder="Enter SKU"
                 disabled={isSubmitting}
               />
@@ -432,7 +432,7 @@ export default function ProductForm({ productEdit }: IProps) {
               </label>
               <input
                 {...register("unit", { required: "Unit is required" })}
-                className="input w-full h-[44px] rounded-md border border-gray6 px-6 text-base focus:border-blue-500"
+                className="input w-full h-[44px] rounded-md border border-gray6 px-6 text-base focus:border-theme"
                 placeholder="e.g., pcs, kg, ltr"
                 disabled={isSubmitting}
               />
@@ -451,7 +451,7 @@ export default function ProductForm({ productEdit }: IProps) {
                   required: "Price is required",
                   min: { value: 1, message: "Price must be at least 1" },
                 })}
-                className="input w-full h-[44px] rounded-md border border-gray6 px-6 text-base focus:border-blue-500"
+                className="input w-full h-[44px] rounded-md border border-gray6 px-6 text-base focus:border-theme"
                 placeholder="0.00"
                 disabled={isSubmitting}
               />
@@ -470,7 +470,7 @@ export default function ProductForm({ productEdit }: IProps) {
                 {...register("discount_percentage", {
                   min: { value: 0, message: "Discount cannot be negative" },
                 })}
-                className="input w-full h-[44px] rounded-md border border-gray6 px-6 text-base focus:border-blue-500"
+                className="input w-full h-[44px] rounded-md border border-gray6 px-6 text-base focus:border-theme"
                 placeholder="0.00"
                 disabled={isSubmitting}
               />
@@ -492,7 +492,7 @@ export default function ProductForm({ productEdit }: IProps) {
                     message: "Quantity cannot be negative",
                   },
                 })}
-                className="input w-full h-[44px] rounded-md border border-gray6 px-6 text-base focus:border-blue-500"
+                className="input w-full h-[44px] rounded-md border border-gray6 px-6 text-base focus:border-theme"
                 placeholder="0"
                 disabled={isSubmitting || productSizes.length > 0}
                 readOnly={productSizes.length > 0}
@@ -520,7 +520,7 @@ export default function ProductForm({ productEdit }: IProps) {
               </label>
               <select
                 {...register("status")}
-                className="input w-full h-[44px] rounded-md border border-gray6 px-6 text-base focus:border-blue-500"
+                className="input w-full h-[44px] rounded-md border border-gray6 px-6 text-base focus:border-theme"
                 disabled={isSubmitting}
               >
                 <option value="in-stock">In Stock</option>
@@ -541,7 +541,7 @@ export default function ProductForm({ productEdit }: IProps) {
                 <input
                   type="date"
                   {...register("offerStartDate")}
-                  className="input w-full h-[44px] rounded-md border border-gray6 px-6 text-base focus:border-blue-500"
+                  className="input w-full h-[44px] rounded-md border border-gray6 px-6 text-base focus:border-theme"
                   disabled={isSubmitting}
                 />
               </div>
@@ -553,7 +553,7 @@ export default function ProductForm({ productEdit }: IProps) {
                 <input
                   type="date"
                   {...register("offerEndDate")}
-                  className="input w-full h-[44px] rounded-md border border-gray6 px-6 text-base focus:border-blue-500"
+                  className="input w-full h-[44px] rounded-md border border-gray6 px-6 text-base focus:border-theme"
                   disabled={isSubmitting}
                 />
               </div>
@@ -629,7 +629,7 @@ export default function ProductForm({ productEdit }: IProps) {
                         </td>
                         <td className="py-3 px-4">
                           {variant.isDefault && (
-                            <span className="inline-flex items-center justify-center w-5 h-5 bg-blue-500 rounded">
+                            <span className="inline-flex items-center justify-center w-5 h-5 bg-theme rounded">
                               <svg
                                 className="w-3 h-3 text-white"
                                 fill="currentColor"
@@ -674,8 +674,8 @@ export default function ProductForm({ productEdit }: IProps) {
                   key={size}
                   className={`cursor-pointer px-4 py-2 border rounded-md text-sm font-medium transition-colors ${
                     productSizes.includes(size)
-                      ? "border-blue-600 bg-blue-50 text-blue-700"
-                      : "border-gray6 text-gray-700 hover:border-blue-400"
+                      ? "border-theme bg-themeLight text-theme"
+                      : "border-gray6 text-gray-700 hover:border-theme"
                   }`}
                 >
                   <input
@@ -813,7 +813,7 @@ export default function ProductForm({ productEdit }: IProps) {
                       value={info.key}
                       onChange={(e) => handleAdditionalInfoChange(index, "key", e.target.value)}
                       placeholder="Key (e.g., Composition)"
-                      className="flex-1 px-4 py-2.5 border border-gray2 rounded-lg focus:outline-none focus:border-blue-500"
+                      className="flex-1 px-4 py-2.5 border border-gray2 rounded-lg focus:outline-none focus:border-theme"
                       disabled={isSubmitting}
                     />
                     <input
@@ -821,7 +821,7 @@ export default function ProductForm({ productEdit }: IProps) {
                       value={info.value}
                       onChange={(e) => handleAdditionalInfoChange(index, "value", e.target.value)}
                       placeholder="Value (e.g., 100% Cotton)"
-                      className="flex-1 px-4 py-2.5 border border-gray2 rounded-lg focus:outline-none focus:border-blue-500"
+                      className="flex-1 px-4 py-2.5 border border-gray2 rounded-lg focus:outline-none focus:border-theme"
                       disabled={isSubmitting}
                     />
                     <button
@@ -846,7 +846,7 @@ export default function ProductForm({ productEdit }: IProps) {
               </label>
               <input
                 {...register("tags")}
-                className="input w-full h-[44px] rounded-md border border-gray6 px-6 text-base focus:border-blue-500"
+                className="input w-full h-[44px] rounded-md border border-gray6 px-6 text-base focus:border-theme"
                 placeholder="e.g., phone, mobile, electronics"
                 disabled={isSubmitting}
               />
@@ -858,7 +858,7 @@ export default function ProductForm({ productEdit }: IProps) {
               </label>
               <input
                 {...register("youtube_video_Id")}
-                className="input w-full h-[44px] rounded-md border border-gray6 px-6 text-base focus:border-blue-500"
+                className="input w-full h-[44px] rounded-md border border-gray6 px-6 text-base focus:border-theme"
                 placeholder="Enter YouTube video ID"
                 disabled={isSubmitting}
               />
@@ -871,7 +871,7 @@ export default function ProductForm({ productEdit }: IProps) {
               type="checkbox"
               id="featured"
               {...register("featured")}
-              className="w-4 h-4 text-blue-600 border-gray3 rounded focus:ring-blue-500"
+              className="w-4 h-4 text-theme border-gray3 rounded focus:ring-theme"
               disabled={isSubmitting}
             />
             <label htmlFor="featured" className="">
@@ -890,7 +890,7 @@ export default function ProductForm({ productEdit }: IProps) {
                   type="checkbox"
                   id="newArrival"
                   {...register("newArrival")}
-                  className="w-4 h-4 text-blue-600 border-gray3 rounded focus:ring-blue-500"
+                  className="w-4 h-4 text-theme border-gray3 rounded focus:ring-theme"
                   disabled={isSubmitting}
                 />
                 <label htmlFor="newArrival" className="text-sm text-gray-700">
@@ -902,7 +902,7 @@ export default function ProductForm({ productEdit }: IProps) {
                   type="checkbox"
                   id="bestSeller"
                   {...register("bestSeller")}
-                  className="w-4 h-4 text-blue-600 border-gray3 rounded focus:ring-blue-500"
+                  className="w-4 h-4 text-theme border-gray3 rounded focus:ring-theme"
                   disabled={isSubmitting}
                 />
                 <label htmlFor="bestSeller" className="text-sm text-gray-700">
@@ -920,7 +920,7 @@ export default function ProductForm({ productEdit }: IProps) {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="bg-blue-600 text-white px-6 py-2.5 rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:bg-blue-400 disabled:cursor-not-allowed flex items-center gap-2"
+              className="bg-theme text-white px-6 py-2.5 rounded-lg hover:bg-themeDark transition-colors font-medium disabled:bg-theme/50 disabled:cursor-not-allowed flex items-center gap-2"
             >
               {isSubmitting && (
                 <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">

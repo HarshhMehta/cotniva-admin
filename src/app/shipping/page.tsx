@@ -56,7 +56,7 @@ export default function ShippingSettingsPage() {
   return (
     <Wrapper>
       <div className="body-content px-8 py-8 bg-slate-100">
-        <div className="max-w-xl bg-white px-8 py-8 rounded-md">
+        <div className="max-w-xl bg-white px-4 sm:px-8 py-6 sm:py-8 rounded-md">
           <h2 className="text-base font-semibold text-heading mb-2">
             Shipping / Delivery
           </h2>

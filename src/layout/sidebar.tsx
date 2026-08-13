@@ -1,12 +1,12 @@
 "use client";
 import React, { useState } from "react";
-import Image from "next/image";
 import sidebar_menu from "@/data/sidebar-menus";
 import { DownArrow } from "@/svg";
 import Link from "next/link";
 import { useDispatch } from "react-redux";
 import { userLoggedOut } from "@/redux/auth/authSlice";
 import { useRouter } from "next/navigation";
+import BrandLogo from "./component/brand-logo";
 
 // prop type
 type IProps = {
@@ -41,17 +41,8 @@ export default function Sidebar({sideMenu,setSideMenu}:IProps) {
         <div className="flex flex-col justify-between h-full">
           <div >
 
-            <div className="py-4 pb-8 px-8 border-b border-gray h-[78px]">
-              <Link href="/dashboard">
-                <Image
-                  className="w-[140px]"
-                  width={140}
-                  height={43}
-                  src="/assets/img/logo/logo.svg"
-                  alt="logo"
-                  priority
-                />
-              </Link>
+            <div className="py-4 px-6 border-b border-gray h-[78px] flex items-center">
+              <BrandLogo />
             </div>
             <div className="px-4 py-5">
               <ul>
@@ -60,7 +51,10 @@ export default function Sidebar({sideMenu,setSideMenu}:IProps) {
                     {!menu.subMenus && menu.title !== 'Online store' && (
                       <Link
                         href={menu.link}
-                        onClick={() => handleMenuActive(menu.title)}
+                        onClick={() => {
+                          handleMenuActive(menu.title);
+                          setSideMenu(false);
+                        }}
                         className={`group rounded-md relative text-black text-lg font-medium inline-flex items-center w-full transition-colors ease-in-out duration-300 px-5 py-[9px] mb-2 hover:bg-gray sidebar-link-active`}
                       >
                         <span className="inline-block mr-[10px] text-xl">
@@ -94,7 +88,7 @@ export default function Sidebar({sideMenu,setSideMenu}:IProps) {
                     )}
                     {menu.title === 'Online store' && (
                       <a
-                        href="https://shofy-client.vercel.app/"
+                        href="/"
                         target="_blank"
                         className={`group cursor-pointer rounded-md relative text-black text-lg font-medium inline-flex items-center w-full transition-colors ease-in-out duration-300 px-5 py-[9px] mb-2 hover:bg-gray sidebar-link-active`}
                       >
@@ -113,6 +107,7 @@ export default function Sidebar({sideMenu,setSideMenu}:IProps) {
                           <li key={i}>
                             <Link
                               href={sub.link}
+                              onClick={() => setSideMenu(false)}
                               className="block font-normal w-full text-[#6D6F71] hover:text-theme nav-dot"
                             >
                               {sub.title}
@@ -134,7 +129,7 @@ export default function Sidebar({sideMenu,setSideMenu}:IProps) {
 
       <div
         onClick={() => setSideMenu(!sideMenu)}
-        className={`fixed top-0 left-0 w-full h-full z-40 bg-black/70 transition-all duration-300 ${sideMenu ? "visible opacity-1" : "  invisible opacity-0 "}`}
+        className={`fixed top-0 left-0 w-full h-full z-40 bg-black/70 transition-all duration-300 lg:hidden ${sideMenu ? "visible opacity-100" : "invisible opacity-0"}`}
       >
         {" "}
       </div>

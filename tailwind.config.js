@@ -14,9 +14,9 @@ export default withMT({
     extend: {
       colors: {
         ...colors,
-        theme: '#0989FF',
-        themeLight: '#E1F0FF',
-        themeDark: '#056ECE',
+        theme: '#4a1f1a',
+        themeLight: '#f3e8e6',
+        themeDark: '#4a0f0f',
         heading: '#010F1C',
         textBody: '#55585B',
         text2: '#c5c8d4',
@@ -24,7 +24,7 @@ export default withMT({
 
         success: '#50CD89',
         danger: '#F1416C',
-        info: '#3E97FF',
+        info: '#8b5a4a',
         warning: '#ff9800',
         purple: '#7239EA',
         pink: '#f000b9',

@@ -8,6 +8,7 @@ import { Menu, Search } from "@/svg";
 import { RootState } from "@/redux/store";
 import default_user from "@assets/img/users/user-10.jpg";
 import NotificationArea from "./component/notification-area";
+import BrandLogo from "./component/brand-logo";
 import { userLoggedOut } from "@/redux/auth/authSlice";
 
 // prop type
@@ -55,16 +56,19 @@ const Header = ({ setSideMenu }: IProps) => {
 
   return (
     <>
-      <header className="relative z-10 bg-white border-b border-gray border-solid py-5 px-8 pr-8">
-        <div className="flex justify-between">
-          <div className="flex items-center space-x-6 lg:space-x-0">
+      <header className="relative z-10 bg-white border-b border-gray border-solid py-3 sm:py-5 px-4 sm:px-8">
+        <div className="flex justify-between items-center gap-3">
+          <div className="flex items-center space-x-4 lg:space-x-0 min-w-0">
             <button
               onClick={() => setSideMenu((prev) => !prev)}
               type="button"
-              className="block lg:hidden text-2xl text-black"
+              className="block lg:hidden text-2xl text-black shrink-0"
             >
               <Menu />
             </button>
+            <div className="md:hidden min-w-0">
+              <BrandLogo className="h-8 max-w-[120px]" />
+            </div>
             <div className="w-[30%] hidden md:block">
               <form action="#">
                 <div className="w-[250px] relative">
@@ -81,9 +85,13 @@ const Header = ({ setSideMenu }: IProps) => {
             </div>
           </div>
 
-          <div className="flex items-center justify-end space-x-6">
+          <div className="flex items-center justify-end space-x-3 sm:space-x-6 shrink-0">
             <div className="md:hidden">
-              <button className="relative w-[40px] h-[40px] leading-[40px] rounded-md text-textBody border border-gray hover:bg-themeLight hover:text-theme hover:border-themeLight">
+              <button
+                type="button"
+                onClick={() => setSearchOverlay(true)}
+                className="relative w-[40px] h-[40px] leading-[40px] rounded-md text-textBody border border-gray hover:bg-themeLight hover:text-theme hover:border-themeLight"
+              >
                 <Search />
               </button>
             </div>
@@ -98,7 +106,7 @@ const Header = ({ setSideMenu }: IProps) => {
             </div>
             <div
               ref={pRef}
-              className="relative w-[70%] flex justify-end items-center"
+              className="relative flex justify-end items-center"
             >
               <button
                 onClick={handleProfileOpen}
@@ -130,7 +138,7 @@ const Header = ({ setSideMenu }: IProps) => {
               </button>
 
               {profileOpen && (
-                <div className="absolute w-[280px] top-full right-0 shadow-lg rounded-md bg-white py-5 px-5">
+                <div className="absolute w-[min(280px,calc(100vw-2rem))] top-full right-0 shadow-lg rounded-md bg-white py-5 px-5 z-50">
                   <div className="flex items-center space-x-3 border-b border-gray pb-3 mb-2">
                     <div>
                       <Image
@@ -187,7 +195,7 @@ const Header = ({ setSideMenu }: IProps) => {
 
         {/*  search  */}
         <div
-          className={`fixed top-0 left-0 w-full bg-white p-10 z-50 transition-transform duration-300 md:hidden ${
+          className={`fixed top-0 left-0 w-full bg-white p-6 sm:p-10 z-50 transition-transform duration-300 md:hidden ${
             searchOverlay
               ? "translate-y-[0px]"
               : " -translate-y-[230px] lg:translate-y-[0]"
@@ -228,8 +236,9 @@ const Header = ({ setSideMenu }: IProps) => {
           </div>
         </div>
         <div
+          onClick={() => setSearchOverlay(false)}
           className={`fixed top-0 left-0 w-full h-full z-40 bg-black/70 transition-all duration-300 ${
-            searchOverlay ? "visible opacity-1" : "  invisible opacity-0 "
+            searchOverlay ? "visible opacity-100" : "invisible opacity-0"
           }`}
         ></div>
       </header>

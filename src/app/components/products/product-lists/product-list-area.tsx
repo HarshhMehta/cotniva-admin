@@ -57,7 +57,7 @@ const ProductListArea = () => {
 
     content = (
       <>
-        <div className="relative overflow-x-auto  mx-8">
+        <div className="relative overflow-x-auto mx-4 sm:mx-8">
           <table className="w-full text-base text-left text-gray-500">
             {/* table head start */}
             <ProductTableHead />
@@ -71,7 +71,7 @@ const ProductListArea = () => {
         </div>
 
         {/* bottom  */}
-        <div className="flex justify-between items-center flex-wrap mx-8">
+        <div className="flex justify-between items-center flex-wrap gap-3 mx-4 sm:mx-8">
           <p className="mb-0 text-tiny">
             Showing {currentItems.length} of{" "}
             {products?.data.length}
@@ -90,7 +90,7 @@ const ProductListArea = () => {
     <>
       {/* table start */}
       <div className="bg-white rounded-t-md rounded-b-md shadow-xs py-4">
-        <div className="tp-search-box flex items-center justify-between px-8 py-8">
+        <div className="tp-search-box flex items-center justify-between px-4 sm:px-8 py-4 sm:py-8 gap-3">
           <div className="search-input relative">
             <input
               onChange={handleSearchProduct}

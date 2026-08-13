@@ -6,7 +6,7 @@ type IPropType = {
   spinner?: "bar" | "fade" | "scale";
   color?: string;
 };
-const Loading = ({ loading, spinner = "bar", color = "0989FF" }: IPropType) => {
+const Loading = ({ loading, spinner = "bar", color = "4a1f1a" }: IPropType) => {
   return (
     <>
       {spinner === "bar" && (
@@ -17,8 +17,8 @@ const Loading = ({ loading, spinner = "bar", color = "0989FF" }: IPropType) => {
           width={100}
         />
       )}
-      {spinner === "fade" && <FadeLoader loading={loading} color="#0989FF" />}
-      {spinner === "scale" && <ScaleLoader loading={loading} color="#0989FF" />}
+      {spinner === "fade" && <FadeLoader loading={loading} color="#4a1f1a" />}
+      {spinner === "scale" && <ScaleLoader loading={loading} color="#4a1f1a" />}
     </>
   );
 };

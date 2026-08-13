@@ -33,6 +33,7 @@ const GalleryTable = () => {
   if (!isLoading && !isError && currentItems) {
     content = (
       <>
+        <div className="overflow-x-auto">
         <table className="w-full text-base text-left text-gray-500">
           <thead>
             <tr className="border-b border-gray6 text-tiny">
@@ -130,7 +131,7 @@ const GalleryTable = () => {
                   <div className="flex items-center justify-end space-x-2">
                     <Link
                       href={`/gallery/edit/${item._id}`}
-                      className="px-3 py-1 text-xs rounded bg-blue-50 text-blue-600 hover:bg-blue-100"
+                      className="px-3 py-1 text-xs rounded bg-themeLight text-theme hover:bg-theme/10"
                     >
                       Edit
                     </Link>
@@ -146,6 +147,7 @@ const GalleryTable = () => {
             ))}
           </tbody>
         </table>
+        </div>
         <div className="flex justify-between items-center flex-wrap mt-3">
           <p className="mb-0 text-tiny">
             Showing 1-{currentItems.length} of {gallery?.result.length}
@@ -162,7 +164,7 @@ const GalleryTable = () => {
   }
 
   return (
-    <div className="relative overflow-x-auto bg-white px-8 py-4 rounded-md">
+    <div className="relative overflow-x-auto bg-white px-4 sm:px-8 py-4 rounded-md">
       {content}
     </div>
   );

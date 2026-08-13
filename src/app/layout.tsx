@@ -6,7 +6,7 @@ import { Poppins } from "next/font/google";
 import { Providers } from "@/redux/provider";
 
 export const metadata: Metadata = {
-  title: "Shofy - eCommerce Admin Template",
+  title: "Cotniva Admin",
 };
 
 const poppins = Poppins({
@@ -26,7 +26,7 @@ export default function RootLayout({children}:{children: React.ReactNode}) {
           name="viewport"
           content="width=device-width, initial-scale=1, shrink-to-fit=no"
         />
-        <link rel="icon" href="/favicon.png" />
+        <link rel="icon" href="/favicon.ico" />
       </head>
       <body className={poppins.className}>
         <Providers>

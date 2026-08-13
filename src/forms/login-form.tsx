@@ -66,7 +66,7 @@ const LoginForm = () => {
         />
         <ErrorMsg msg={errors.password?.message as string} />
       </div>
-      <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between flex-wrap">
         <div className="tp-checkbox flex items-start space-x-2 mb-3">
           <input id="product-1" type="checkbox" />
           <label htmlFor="product-1" className="text-tiny">

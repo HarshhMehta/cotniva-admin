@@ -97,7 +97,7 @@ export default function ImageUpload({
               error ? "border-red" : "border-gray6"
             }  overflow-hidden h-[46px]`}
           >
-            <span className="flex items-center justify-center h-full px-4 font-medium bg-blue/10 text-blue whitespace-nowrap">
+            <span className="flex items-center justify-center h-full px-4 font-medium bg-themeLight text-theme whitespace-nowrap">
               Choose File
             </span>
             <span className="flex-1 px-4 truncate text-dark-5">
@@ -183,7 +183,7 @@ export default function ImageUpload({
                 setColor(e.target.value);
               }}
               placeholder="Enter color name"
-              className="rounded-lg border border-gray-3  placeholder:text-dark-5 w-full py-2.5 px-4 h-11 focus:ring-0 duration-200 focus:border-blue focus:outline-0"
+              className="rounded-lg border border-gray-3  placeholder:text-dark-5 w-full py-2.5 px-4 h-11 focus:ring-0 duration-200 focus:border-theme focus:outline-0"
             />
           </div>
         )}

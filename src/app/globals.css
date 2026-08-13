@@ -110,8 +110,39 @@ input[type=number] {
     font-weight: 500;
 }
 .pagination ul.list-wrap li.current {
-    background-color: #0989ff;
+    background-color: #4a1f1a;
     color: #fff;
+}
+
+.tp-main-wrapper {
+    overflow-x: hidden;
+}
+.tp-main-content {
+    min-width: 0;
+}
+.body-content {
+    min-width: 0;
+}
+
+@media (max-width: 767px) {
+    .body-content {
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+    }
+    .tp-search-box {
+        flex-direction: column;
+        align-items: stretch !important;
+        gap: 12px;
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+        padding-top: 1rem !important;
+        padding-bottom: 1rem !important;
+    }
+    .tp-search-box .flex.justify-end {
+        justify-content: flex-start !important;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
 }
 .pagination ul.list-wrap li.disabled {
     display: none;

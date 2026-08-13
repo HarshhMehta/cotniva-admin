@@ -31,8 +31,8 @@ const PieChart = () => {
         {
           label: "# of Votes",
           data: sellingCategory?.categoryData.map((c) => c.count),
-          backgroundColor: ["#50CD89", "#F1416C", "#3E97FF", "#ff9800"],
-          borderColor: ["#50CD89", "#F1416C", "#3E97FF", "#ff9800"],
+          backgroundColor: ["#50CD89", "#F1416C", "#4a1f1a", "#ff9800"],
+          borderColor: ["#50CD89", "#F1416C", "#4a1f1a", "#ff9800"],
           borderWidth: 1,
         },
       ],
