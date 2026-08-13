@@ -63,7 +63,7 @@ const OrderTable = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { data: orders, isError, isLoading } = useGetAllOrdersQuery(undefined, {
-    pollingInterval: 8000,
+    pollingInterval: 15000,
     refetchOnFocus: true,
     refetchOnMountOrArgChange: true,
   });

@@ -25,7 +25,7 @@ import {
 
 dayjs.extend(relativeTime);
 
-const POLL_MS = 4000;
+const POLL_MS = 15000;
 
 type IPropType = {
   nRef: React.RefObject<HTMLDivElement>;

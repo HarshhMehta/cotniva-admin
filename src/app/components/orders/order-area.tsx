@@ -5,7 +5,7 @@ import { useGetAllOrdersQuery } from "@/redux/order/orderApi";
 
 const OrderArea = () => {
   const { data: orders, isLoading } = useGetAllOrdersQuery(undefined, {
-    pollingInterval: 8000,
+    pollingInterval: 15000,
     refetchOnFocus: true,
   });
 
