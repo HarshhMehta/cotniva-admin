@@ -47,5 +47,8 @@ export const apiSlice = createApi({
     "Notifications",
     "NotificationCount",
     "Customers",
+    "NewsletterStats",
+    "NewsletterSubscribers",
+    "NewsletterCampaigns",
   ],
 });

@@ -68,6 +68,12 @@ const sidebar_menu: Array<ISidebarMenus> = [
     title: "Reviews",
   },
   {
+    id: 20,
+    icon: Pages,
+    link: "/newsletter",
+    title: "Newsletter",
+  },
+  {
     id: 7,
     icon: Coupons,
     link: "/coupon",
