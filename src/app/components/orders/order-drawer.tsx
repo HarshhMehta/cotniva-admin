@@ -7,17 +7,21 @@ import {
   useGetSingleOrderQuery,
   useUpdateAdminNotesMutation,
   useUpdateStatusMutation,
+  useEmergencyCancelMutation,
 } from "@/redux/order/orderApi";
 import { notifyError, notifySuccess } from "@/utils/toast";
 import InvoicePrint from "./invoice-print";
 import type { IOrderCartItem, Order } from "@/types/order-amount-type";
-
-const STATUS_OPTS = [
-  { value: "pending", label: "Pending" },
-  { value: "processing", label: "Processing" },
-  { value: "delivered", label: "Delivered" },
-  { value: "cancel", label: "Cancelled" },
-];
+import {
+  CANCEL_REASONS,
+  FULFILLMENT_FLOW,
+  STATUS_LABELS,
+  canEmergencyCancel,
+  isCancelledStatus,
+  nextStatusOptions,
+  paymentBadgeClass,
+  statusBadgeClass,
+} from "@/utils/order-status";
 
 const inr = (n?: number) =>
   `₹${Number(n || 0).toLocaleString("en-IN", {
@@ -38,28 +42,21 @@ const productImg = (item: IOrderCartItem) =>
   "";
 
 const paymentBadge = (order?: Order | null) => {
-  const method = String(order?.paymentMethod || "").toLowerCase();
-  const paid = Boolean(order?.paymentIntent?.razorpay_payment_id);
-  if (method.includes("razorpay") || method.includes("card")) {
-    return paid
-      ? { label: "Paid", cls: "bg-emerald-50 text-emerald-700 border-emerald-200" }
-      : { label: "Unpaid", cls: "bg-amber-50 text-amber-700 border-amber-200" };
-  }
-  if (method.includes("cod") || method.includes("cash")) {
-    return {
-      label: order?.status === "delivered" ? "COD Collected" : "COD Pending",
-      cls: "bg-sky-50 text-sky-700 border-sky-200",
-    };
-  }
-  return { label: order?.paymentMethod || "—", cls: "bg-slate-50 text-slate-600 border-slate-200" };
+  const ps = String(
+    order?.paymentStatus ||
+      (order?.paymentIntent?.razorpay_payment_id ? "paid" : "pending")
+  ).toLowerCase();
+  return {
+    label: ps.charAt(0).toUpperCase() + ps.slice(1),
+    cls: paymentBadgeClass(ps),
+  };
 };
 
-const statusCls = (s?: string) => {
-  const v = String(s || "").toLowerCase();
-  if (v === "delivered") return "bg-emerald-50 text-emerald-700";
-  if (v === "processing") return "bg-indigo-50 text-indigo-700";
-  if (v === "cancel") return "bg-rose-50 text-rose-700";
-  return "bg-amber-50 text-amber-700";
+const historyTime = (order: Order, statusKey: string) => {
+  const hit = (order.statusHistory || []).find(
+    (h) => String(h.to || "").toLowerCase() === statusKey
+  );
+  return hit?.at || null;
 };
 
 type Props = {
@@ -74,14 +71,29 @@ const OrderDrawer = ({ orderId, open, onClose }: Props) => {
     orderId || "",
     { skip }
   );
-  const [updateStatus] = useUpdateStatusMutation();
+  const [updateStatus, { isLoading: updatingStatus }] = useUpdateStatusMutation();
+  const [emergencyCancel, { isLoading: cancelling }] =
+    useEmergencyCancelMutation();
   const [updateNotes, { isLoading: savingNotes }] = useUpdateAdminNotesMutation();
   const [notes, setNotes] = useState("");
+  const [nextStatus, setNextStatus] = useState("");
+  const [trackingNumber, setTrackingNumber] = useState("");
+  const [trackingUrl, setTrackingUrl] = useState("");
+  const [showCancel, setShowCancel] = useState(false);
+  const [cancelCode, setCancelCode] = useState(CANCEL_REASONS[0].code);
+  const [cancelOther, setCancelOther] = useState("");
   const printRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     setNotes(order?.adminNotes || "");
-  }, [order?.adminNotes, order?._id]);
+    setTrackingNumber(order?.trackingNumber || "");
+    setTrackingUrl(order?.trackingUrl || "");
+    const opts = nextStatusOptions(order?.status);
+    setNextStatus(opts[0]?.value || "");
+    setShowCancel(false);
+    setCancelCode(CANCEL_REASONS[0].code);
+    setCancelOther("");
+  }, [order?.adminNotes, order?._id, order?.status, order?.trackingNumber, order?.trackingUrl]);
 
   useEffect(() => {
     if (!open) return undefined;
@@ -106,30 +118,54 @@ const OrderDrawer = ({ orderId, open, onClose }: Props) => {
 
   const timeline = useMemo(() => {
     if (!order) return [];
-    const created = order.createdAt;
-    const updated = order.updatedAt;
-    const status = String(order.status || "pending").toLowerCase();
-    return [
-      {
-        key: "placed",
-        title: "Order placed",
-        time: created,
+    const raw = String(order.status || "confirmed").toLowerCase();
+    const cancelled = isCancelledStatus(raw);
+    const mapped = raw === "pending" ? "confirmed" : raw;
+    const flowIndex = cancelled
+      ? -1
+      : FULFILLMENT_FLOW.indexOf(
+          mapped as (typeof FULFILLMENT_FLOW)[number]
+        );
+
+    type Step = {
+      key: string;
+      title: string;
+      time: string | null | undefined;
+      done: boolean;
+    };
+
+    const steps: Step[] = FULFILLMENT_FLOW.map((key, i) => {
+      const reached = !cancelled && flowIndex >= 0 && i <= flowIndex;
+      const time =
+        historyTime(order, key) ||
+        (key === "confirmed" && reached ? order.createdAt : null) ||
+        (reached && i === flowIndex ? order.updatedAt : null);
+      return {
+        key,
+        title: STATUS_LABELS[key] || key,
+        time,
+        done: reached,
+      };
+    });
+
+    if (cancelled) {
+      steps.push({
+        key: "cancelled",
+        title: "Cancelled",
+        time:
+          order.cancellation?.cancelledAt ||
+          historyTime(order, "cancelled") ||
+          historyTime(order, "cancel") ||
+          order.updatedAt ||
+          null,
         done: true,
-      },
-      {
-        key: "processing",
-        title: "Processing",
-        time: status === "processing" || status === "delivered" ? updated : null,
-        done: status === "processing" || status === "delivered",
-      },
-      {
-        key: "delivered",
-        title: status === "cancel" ? "Cancelled" : "Delivered",
-        time: status === "delivered" || status === "cancel" ? updated : null,
-        done: status === "delivered" || status === "cancel",
-      },
-    ];
+      });
+    }
+    return steps;
   }, [order]);
+
+  const nextOpts = nextStatusOptions(order?.status);
+  const allowCancel = canEmergencyCancel(order?.status);
 
   const fullAddress = order
     ? [order.address, order.city, order.zipCode, order.country]
@@ -148,10 +184,60 @@ const OrderDrawer = ({ orderId, open, onClose }: Props) => {
     }
   };
 
-  const onStatus = async (value: string) => {
-    if (!orderId) return;
-    const res = await updateStatus({ id: orderId, status: { status: value } });
+  const onStatus = async () => {
+    if (!orderId || !nextStatus) return;
+    const body: {
+      status: string;
+      trackingNumber?: string;
+      trackingUrl?: string;
+    } = { status: nextStatus };
+    if (nextStatus === "shipped") {
+      const tn = trackingNumber.trim();
+      const tu = trackingUrl.trim();
+      if (tu) {
+        try {
+          // Require absolute http(s) URL when provided
+          const parsed = new URL(tu);
+          if (!/^https?:$/i.test(parsed.protocol)) {
+            notifyError("Tracking URL must start with http:// or https://");
+            return;
+          }
+        } catch {
+          notifyError("Please enter a valid Tracking URL");
+          return;
+        }
+        body.trackingUrl = tu;
+      }
+      if (tn) body.trackingNumber = tn;
+    }
+    const res = await updateStatus({ id: orderId, status: body });
     if ("data" in res && res.data?.message) notifySuccess(res.data.message);
+    else if ("error" in res) {
+      const err = res.error as { data?: { message?: string } };
+      notifyError(err?.data?.message || "Could not update status");
+    }
+  };
+
+  const onEmergencyCancel = async () => {
+    if (!orderId) return;
+    const reason =
+      cancelCode === "other" ? cancelOther.trim() : undefined;
+    if (cancelCode === "other" && !reason) {
+      notifyError("Please enter a cancellation reason");
+      return;
+    }
+    const res = await emergencyCancel({
+      id: orderId,
+      reasonCode: cancelCode,
+      reason,
+    });
+    if ("data" in res && res.data) {
+      notifySuccess(res.data.message || "Order cancelled");
+      setShowCancel(false);
+    } else if ("error" in res) {
+      const err = res.error as { data?: { message?: string } };
+      notifyError(err?.data?.message || "Could not cancel order");
+    }
   };
 
   const onSaveNotes = async () => {
@@ -162,6 +248,11 @@ const OrderDrawer = ({ orderId, open, onClose }: Props) => {
   };
 
   if (!open) return null;
+
+  const statusLabel =
+    STATUS_LABELS[String(order?.status || "").toLowerCase()] ||
+    order?.status ||
+    "—";
 
   return (
     <>
@@ -188,11 +279,11 @@ const OrderDrawer = ({ orderId, open, onClose }: Props) => {
             </h2>
             <div className="flex flex-wrap gap-2 mt-2">
               <span
-                className={`text-[11px] font-semibold px-2.5 py-1 rounded-full capitalize ${statusCls(
+                className={`text-[11px] font-semibold px-2.5 py-1 rounded-full ${statusBadgeClass(
                   order?.status
                 )}`}
               >
-                {order?.status || "—"}
+                {statusLabel}
               </span>
               <span
                 className={`text-[11px] font-semibold px-2.5 py-1 rounded-full border ${pay.cls}`}
@@ -343,7 +434,7 @@ const OrderDrawer = ({ orderId, open, onClose }: Props) => {
                     </dd>
                   </div>
                   <div className="flex justify-between gap-3">
-                    <dt className="text-slate-500">Status</dt>
+                    <dt className="text-slate-500">Payment status</dt>
                     <dd className="font-medium text-slate-900">{pay.label}</dd>
                   </div>
                   <div className="flex justify-between gap-3">
@@ -358,8 +449,53 @@ const OrderDrawer = ({ orderId, open, onClose }: Props) => {
                       {order.paymentIntent?.razorpay_payment_id || "—"}
                     </dd>
                   </div>
+                  {order.refund?.status &&
+                    order.refund.status !== "not_required" && (
+                      <>
+                        <div className="flex justify-between gap-3">
+                          <dt className="text-slate-500">Refund status</dt>
+                          <dd className="font-medium text-slate-900 capitalize">
+                            {order.refund.status}
+                          </dd>
+                        </div>
+                        {order.refund.razorpayRefundId ? (
+                          <div className="flex justify-between gap-3">
+                            <dt className="text-slate-500">Refund ID</dt>
+                            <dd className="font-mono text-[11px] text-slate-700 break-all text-right">
+                              {order.refund.razorpayRefundId}
+                            </dd>
+                          </div>
+                        ) : null}
+                        {order.refund.error ? (
+                          <p className="text-xs text-rose-600 mt-1">
+                            {order.refund.error}
+                          </p>
+                        ) : null}
+                      </>
+                    )}
                 </dl>
               </section>
+
+              {isCancelledStatus(order.status) && order.cancellation ? (
+                <section className="rounded-xl border border-rose-200 bg-rose-50/40 p-4">
+                  <h3 className="text-xs font-semibold uppercase tracking-wider text-rose-500 mb-2">
+                    Cancellation
+                  </h3>
+                  <p className="text-sm text-slate-800">
+                    {order.cancellation.reason || "—"}
+                  </p>
+                  <p className="text-xs text-slate-500 mt-1">
+                    {order.cancellation.cancelledByEmail
+                      ? `By ${order.cancellation.cancelledByEmail}`
+                      : "Admin"}
+                    {order.cancellation.cancelledAt
+                      ? ` · ${dayjs(order.cancellation.cancelledAt).format(
+                          "MMM D, YYYY · h:mm A"
+                        )}`
+                      : ""}
+                  </p>
+                </section>
+              ) : null}
 
               <section className="rounded-xl border border-slate-200 p-4">
                 <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-3">
@@ -392,22 +528,145 @@ const OrderDrawer = ({ orderId, open, onClose }: Props) => {
                 </ol>
               </section>
 
-              <section className="rounded-xl border border-slate-200 p-4">
-                <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-3">
-                  Update status
-                </h3>
-                <select
-                  className="w-full h-10 rounded-lg border border-slate-200 px-3 text-sm"
-                  value={String(order.status || "pending").toLowerCase()}
-                  onChange={(e) => onStatus(e.target.value)}
-                >
-                  {STATUS_OPTS.map((o) => (
-                    <option key={o.value} value={o.value}>
-                      {o.label}
-                    </option>
-                  ))}
-                </select>
-              </section>
+              {!isCancelledStatus(order.status) && nextOpts.length > 0 ? (
+                <section className="rounded-xl border border-slate-200 p-4">
+                  <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-3">
+                    Advance status
+                  </h3>
+                  <p className="text-xs text-slate-500 mb-2">
+                    Current:{" "}
+                    <strong className="text-slate-800">{statusLabel}</strong>
+                    {" · "}
+                    only the next step is allowed
+                  </p>
+                  <select
+                    className="w-full h-10 rounded-lg border border-slate-200 px-3 text-sm"
+                    value={nextStatus}
+                    onChange={(e) => setNextStatus(e.target.value)}
+                  >
+                    {nextOpts.map((o) => (
+                      <option key={o.value} value={o.value}>
+                        {o.label}
+                      </option>
+                    ))}
+                  </select>
+                  {nextStatus === "shipped" ? (
+                    <div className="mt-3 space-y-3">
+                      <div>
+                        <label
+                          htmlFor="cot-tracking-number"
+                          className="block text-[11px] font-semibold uppercase tracking-wider text-slate-500 mb-1.5"
+                        >
+                          Tracking Number / Tracking ID
+                          <span className="font-normal normal-case tracking-normal text-slate-400">
+                            {" "}
+                            (optional)
+                          </span>
+                        </label>
+                        <input
+                          id="cot-tracking-number"
+                          type="text"
+                          autoComplete="off"
+                          className="w-full h-10 rounded-lg border border-slate-200 px-3 text-sm"
+                          placeholder="e.g. AWBI234567890"
+                          value={trackingNumber}
+                          onChange={(e) => setTrackingNumber(e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <label
+                          htmlFor="cot-tracking-url"
+                          className="block text-[11px] font-semibold uppercase tracking-wider text-slate-500 mb-1.5"
+                        >
+                          Tracking URL
+                          <span className="font-normal normal-case tracking-normal text-slate-400">
+                            {" "}
+                            (optional)
+                          </span>
+                        </label>
+                        <input
+                          id="cot-tracking-url"
+                          type="url"
+                          inputMode="url"
+                          autoComplete="off"
+                          className="w-full h-10 rounded-lg border border-slate-200 px-3 text-sm"
+                          placeholder="https://…"
+                          value={trackingUrl}
+                          onChange={(e) => setTrackingUrl(e.target.value)}
+                        />
+                      </div>
+                    </div>
+                  ) : null}
+                  <button
+                    type="button"
+                    onClick={onStatus}
+                    disabled={updatingStatus || !nextStatus}
+                    className="mt-3 h-9 px-4 rounded-lg bg-[#4a1f1a] text-white text-xs font-semibold tracking-wide uppercase disabled:opacity-50"
+                  >
+                    {updatingStatus ? "Updating…" : "Update status"}
+                  </button>
+                </section>
+              ) : null}
+
+              {allowCancel ? (
+                <section className="rounded-xl border border-rose-200 p-4">
+                  <h3 className="text-xs font-semibold uppercase tracking-wider text-rose-500 mb-2">
+                    Emergency cancel
+                  </h3>
+                  <p className="text-xs text-slate-500 mb-3">
+                    Cancels the order, restores inventory, and refunds via
+                    Razorpay. Only allowed before shipping.
+                  </p>
+                  {!showCancel ? (
+                    <button
+                      type="button"
+                      onClick={() => setShowCancel(true)}
+                      className="h-9 px-4 rounded-lg border border-rose-300 text-rose-700 text-xs font-semibold uppercase"
+                    >
+                      Cancel order
+                    </button>
+                  ) : (
+                    <div className="space-y-2">
+                      <select
+                        className="w-full h-10 rounded-lg border border-slate-200 px-3 text-sm"
+                        value={cancelCode}
+                        onChange={(e) => setCancelCode(e.target.value)}
+                      >
+                        {CANCEL_REASONS.map((r) => (
+                          <option key={r.code} value={r.code}>
+                            {r.label}
+                          </option>
+                        ))}
+                      </select>
+                      {cancelCode === "other" ? (
+                        <textarea
+                          className="w-full min-h-[72px] rounded-lg border border-slate-200 p-3 text-sm"
+                          placeholder="Describe the reason…"
+                          value={cancelOther}
+                          onChange={(e) => setCancelOther(e.target.value)}
+                        />
+                      ) : null}
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={onEmergencyCancel}
+                          disabled={cancelling}
+                          className="h-9 px-4 rounded-lg bg-rose-700 text-white text-xs font-semibold uppercase disabled:opacity-50"
+                        >
+                          {cancelling ? "Cancelling…" : "Confirm cancel + refund"}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setShowCancel(false)}
+                          className="h-9 px-3 rounded-lg border border-slate-200 text-xs font-semibold text-slate-600"
+                        >
+                          Back
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </section>
+              ) : null}
 
               <section className="rounded-xl border border-slate-200 p-4">
                 <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-3">

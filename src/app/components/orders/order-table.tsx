@@ -10,6 +10,10 @@ import OrderDrawer from "./order-drawer";
 import { useGetAllOrdersQuery } from "@/redux/order/orderApi";
 import usePagination from "@/hooks/use-pagination";
 import type { Order } from "@/types/order-amount-type";
+import {
+  STATUS_LABELS,
+  statusBadgeClass,
+} from "@/utils/order-status";
 
 type SortKey = "date_desc" | "date_asc" | "total_desc" | "total_asc" | "invoice_desc";
 
@@ -23,35 +27,26 @@ const qtyOf = (o: Order) =>
   (o.cart || []).reduce((acc, curr) => acc + (Number(curr.orderQuantity) || 0), 0);
 
 const paymentMeta = (o: Order) => {
-  const method = String(o.paymentMethod || "").toLowerCase();
-  const paid = Boolean(o.paymentIntent?.razorpay_payment_id);
-  if (method.includes("razorpay") || method.includes("card")) {
-    return {
-      methodLabel: "Razorpay",
-      methodCls: "bg-[#4a1f1a]/10 text-[#4a1f1a]",
-      payLabel: paid ? "Paid" : "Unpaid",
-      payCls: paid
-        ? "bg-emerald-50 text-emerald-700"
-        : "bg-amber-50 text-amber-700",
-    };
-  }
+  const ps = String(
+    o.paymentStatus ||
+      (o.paymentIntent?.razorpay_payment_id ? "paid" : "pending")
+  ).toLowerCase();
+  const payCls =
+    ps === "paid"
+      ? "bg-emerald-50 text-emerald-700"
+      : ps === "refunded"
+        ? "bg-slate-100 text-slate-700"
+        : ps === "failed"
+          ? "bg-rose-50 text-rose-700"
+          : "bg-amber-50 text-amber-700";
   return {
-    methodLabel: "COD",
-    methodCls: "bg-sky-50 text-sky-700",
-    payLabel: o.status === "delivered" ? "Collected" : "Pending",
-    payCls:
-      o.status === "delivered"
-        ? "bg-emerald-50 text-emerald-700"
-        : "bg-amber-50 text-amber-700",
+    methodLabel: /razorpay|card/i.test(String(o.paymentMethod || ""))
+      ? "Razorpay"
+      : String(o.paymentMethod || "—"),
+    methodCls: "bg-[#4a1f1a]/10 text-[#4a1f1a]",
+    payLabel: ps.charAt(0).toUpperCase() + ps.slice(1),
+    payCls,
   };
-};
-
-const statusCls = (s?: string) => {
-  const v = String(s || "").toLowerCase();
-  if (v === "delivered") return "bg-emerald-50 text-emerald-700";
-  if (v === "processing") return "bg-indigo-50 text-indigo-700";
-  if (v === "cancel") return "bg-rose-50 text-rose-700";
-  return "bg-amber-50 text-amber-700";
 };
 
 const customerName = (o: Order) =>
@@ -110,27 +105,48 @@ const OrderTable = () => {
       });
     }
     if (statusFilter) {
-      list = list.filter(
-        (o) => String(o.status || "").toLowerCase() === statusFilter
-      );
+      if (statusFilter === "confirmed") {
+        list = list.filter((o) =>
+          ["confirmed", "pending"].includes(String(o.status || "").toLowerCase())
+        );
+      } else if (statusFilter === "cancelled") {
+        list = list.filter((o) =>
+          ["cancel", "cancelled"].includes(String(o.status || "").toLowerCase())
+        );
+      } else {
+        list = list.filter(
+          (o) => String(o.status || "").toLowerCase() === statusFilter
+        );
+      }
     }
     if (methodFilter === "razorpay") {
       list = list.filter((o) =>
         /razorpay|card/i.test(String(o.paymentMethod || ""))
       );
     }
-    if (methodFilter === "cod") {
-      list = list.filter((o) => /cod|cash/i.test(String(o.paymentMethod || "")));
-    }
     if (paymentFilter === "paid") {
-      list = list.filter((o) => Boolean(o.paymentIntent?.razorpay_payment_id));
+      list = list.filter(
+        (o) =>
+          String(o.paymentStatus || "").toLowerCase() === "paid" ||
+          Boolean(o.paymentIntent?.razorpay_payment_id)
+      );
     }
-    if (paymentFilter === "unpaid") {
-      list = list.filter((o) => {
-        const isRzp = /razorpay|card/i.test(String(o.paymentMethod || ""));
-        if (isRzp) return !o.paymentIntent?.razorpay_payment_id;
-        return String(o.status || "").toLowerCase() !== "delivered";
-      });
+    if (paymentFilter === "pending") {
+      list = list.filter(
+        (o) =>
+          String(o.paymentStatus || "pending").toLowerCase() === "pending" &&
+          !o.paymentIntent?.razorpay_payment_id
+      );
+    }
+    if (paymentFilter === "refunded") {
+      list = list.filter(
+        (o) => String(o.paymentStatus || "").toLowerCase() === "refunded"
+      );
+    }
+    if (paymentFilter === "failed") {
+      list = list.filter(
+        (o) => String(o.paymentStatus || "").toLowerCase() === "failed"
+      );
     }
 
     list.sort((a, b) => {
@@ -271,11 +287,12 @@ const OrderTable = () => {
                     </td>
                     <td className="px-3 py-2.5">
                       <span
-                        className={`text-[11px] font-semibold capitalize px-2.5 py-1 rounded-full ${statusCls(
+                        className={`text-[11px] font-semibold px-2.5 py-1 rounded-full ${statusBadgeClass(
                           item.status
                         )}`}
                       >
-                        {item.status}
+                        {STATUS_LABELS[String(item.status || "").toLowerCase()] ||
+                          item.status}
                       </span>
                     </td>
                     <td className="px-3 py-2.5 text-sm text-slate-600 whitespace-nowrap">
@@ -338,10 +355,13 @@ const OrderTable = () => {
             onChange={(e) => setStatusFilter(e.target.value)}
           >
             <option value="">All statuses</option>
-            <option value="pending">Pending</option>
+            <option value="confirmed">Confirmed</option>
             <option value="processing">Processing</option>
+            <option value="packed">Packed</option>
+            <option value="shipped">Shipped</option>
+            <option value="out_for_delivery">Out for delivery</option>
             <option value="delivered">Delivered</option>
-            <option value="cancel">Cancelled</option>
+            <option value="cancelled">Cancelled</option>
           </select>
           <select
             className="h-10 rounded-lg border border-slate-200 px-3 text-xs font-medium bg-white"
@@ -350,7 +370,6 @@ const OrderTable = () => {
           >
             <option value="">All methods</option>
             <option value="razorpay">Razorpay</option>
-            <option value="cod">COD</option>
           </select>
           <select
             className="h-10 rounded-lg border border-slate-200 px-3 text-xs font-medium bg-white"
@@ -359,7 +378,9 @@ const OrderTable = () => {
           >
             <option value="">Payment status</option>
             <option value="paid">Paid</option>
-            <option value="unpaid">Unpaid / COD pending</option>
+            <option value="pending">Pending</option>
+            <option value="failed">Failed</option>
+            <option value="refunded">Refunded</option>
           </select>
           <select
             className="h-10 rounded-lg border border-slate-200 px-3 text-xs font-medium bg-white"

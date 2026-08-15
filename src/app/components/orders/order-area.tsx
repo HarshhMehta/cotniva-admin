@@ -12,17 +12,21 @@ const OrderArea = () => {
   const stats = useMemo(() => {
     const list = orders?.data || [];
     const total = list.length;
-    const pending = list.filter(
-      (o) => String(o.status).toLowerCase() === "pending"
+    const confirmed = list.filter((o) =>
+      ["confirmed", "pending"].includes(String(o.status).toLowerCase())
     ).length;
-    const processing = list.filter(
-      (o) => String(o.status).toLowerCase() === "processing"
+    const inProgress = list.filter((o) =>
+      ["processing", "packed", "shipped", "out_for_delivery"].includes(
+        String(o.status).toLowerCase()
+      )
     ).length;
-    const revenue = list.reduce((acc, o) => acc + Number(o.totalAmount || 0), 0);
+    const revenue = list
+      .filter((o) => String(o.paymentStatus || "").toLowerCase() === "paid")
+      .reduce((acc, o) => acc + Number(o.totalAmount || 0), 0);
     const razorpay = list.filter((o) =>
       /razorpay|card/i.test(String(o.paymentMethod || ""))
     ).length;
-    return { total, pending, processing, revenue, razorpay };
+    return { total, confirmed, inProgress, revenue, razorpay };
   }, [orders?.data]);
 
   const inr = (n: number) =>
@@ -35,13 +39,13 @@ const OrderArea = () => {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {[
           { label: "Total orders", value: isLoading ? "…" : String(stats.total) },
-          { label: "Pending", value: isLoading ? "…" : String(stats.pending) },
+          { label: "Confirmed", value: isLoading ? "…" : String(stats.confirmed) },
           {
-            label: "Processing",
-            value: isLoading ? "…" : String(stats.processing),
+            label: "In progress",
+            value: isLoading ? "…" : String(stats.inProgress),
           },
           {
-            label: "Gross revenue",
+            label: "Paid revenue",
             value: isLoading ? "…" : inr(stats.revenue),
           },
         ].map((card) => (

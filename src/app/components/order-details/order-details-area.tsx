@@ -9,6 +9,8 @@ import { useReactToPrint } from "react-to-print";
 import { notifyError } from "@/utils/toast";
 import { getOrderCustomerName } from "@/types/order-amount-type";
 import { formatINR } from "@/utils/format-inr";
+import { STATUS_LABELS } from "@/utils/order-status";
+import OrderStatusChange from "../orders/status-change";
 
 const OrderDetailsArea = ({ id }: { id: string }) => {
   const { data: orderData, isLoading, isError } = useGetSingleOrderQuery(id);
@@ -53,20 +55,24 @@ const OrderDetailsArea = ({ id }: { id: string }) => {
                       {" "}
                       <span className="font-heading">
                         <span className="inline-flex px-2 text-base font-medium leading-5 rounded-full">
-                          {orderData.status}
+                          {STATUS_LABELS[
+                            String(orderData.status || "").toLowerCase()
+                          ] || orderData.status}
+                          {orderData.paymentStatus
+                            ? ` · ${orderData.paymentStatus}`
+                            : ""}
                         </span>
                       </span>
                     </span>
                   </p>
                 </h1>
                 <div className="lg:text-right text-left">
-                  <h2 className="lg:flex lg:justify-end text-lg font-semibold mt-4 lg:mt-0 lg:ml-0 md:mt-0">
-                    {/* <img
-                      src="/static/media/logo-dark.acf69e90.svg"
-                      alt="dashtar"
-                      width="110"
-                    /> */}
-                  </h2>
+                  <div className="mt-2">
+                    <OrderStatusChange
+                      id={orderData._id}
+                      currentStatus={orderData.status}
+                    />
+                  </div>
                   <p className="text-base text-gray-500 dark:text-gray-400 mt-2">
                     Dhaka, Bangladesh
                   </p>

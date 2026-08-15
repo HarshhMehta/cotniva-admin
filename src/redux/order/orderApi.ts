@@ -48,7 +48,10 @@ export const authApi = apiSlice.injectEndpoints({
       providesTags: (result, error, id) => [{ type: "AllOrders", id }],
       keepUnusedDataFor: 600,
     }),
-    updateStatus: builder.mutation<IUpdateStatusOrderRes, { id: string, status: { status: string } }>({
+    updateStatus: builder.mutation<
+      IUpdateStatusOrderRes,
+      { id: string; status: { status: string; trackingNumber?: string; trackingUrl?: string } }
+    >({
       query({ id, status }) {
         return {
           url: `/api/order/update-status/${id}`,
@@ -56,7 +59,20 @@ export const authApi = apiSlice.injectEndpoints({
           body: status,
         };
       },
-      invalidatesTags: ["AllOrders","DashboardRecentOrders"],
+      invalidatesTags: ["AllOrders", "DashboardRecentOrders"],
+    }),
+    emergencyCancel: builder.mutation<
+      import("@/types/order-amount-type").IEmergencyCancelRes,
+      { id: string; reasonCode: string; reason?: string }
+    >({
+      query({ id, reasonCode, reason }) {
+        return {
+          url: `/api/order/${id}/emergency-cancel`,
+          method: "POST",
+          body: { reasonCode, reason },
+        };
+      },
+      invalidatesTags: ["AllOrders", "DashboardRecentOrders"],
     }),
     updateAdminNotes: builder.mutation<
       { success: boolean; message: string; order?: Order },
@@ -93,6 +109,7 @@ export const {
   useGetRecentOrdersQuery,
   useGetAllOrdersQuery,
   useUpdateStatusMutation,
+  useEmergencyCancelMutation,
   useGetSingleOrderQuery,
   useUpdateAdminNotesMutation,
   useSyncRazorpayAddressMutation,

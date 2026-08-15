@@ -1,11 +1,10 @@
 import React from "react";
-import { Select, Option } from "@material-tailwind/react";
 import dayjs from "dayjs";
-import { Delete, Edit } from "@/svg";
 import { IOrder } from "@/types/order-amount-type";
 import OrderActions from "../orders/order-actions";
 import OrderStatusChange from "../orders/status-change";
 import { formatINR } from "@/utils/format-inr";
+import { STATUS_LABELS, statusBadgeClass } from "@/utils/order-status";
 
 const TableItem = (props: { order: IOrder }) => {
   const { order } = props;
@@ -15,6 +14,7 @@ const TableItem = (props: { order: IOrder }) => {
       : order.paymentMethod === "Card"
       ? "Card"
       : order.paymentMethod;
+  const statusKey = String(order.status || "").toLowerCase();
   return (
     <tr className="bg-white border-b border-gray6 last:border-0 text-start">
       <td className="px-3 py-3">#{order.invoice}</td>
@@ -26,27 +26,17 @@ const TableItem = (props: { order: IOrder }) => {
       <td className="px-3 py-3">{formatINR(order.totalAmount)}</td>
       <td className="px-3 py-3">
         <span
-          className={`text-[11px] px-3 py-1 rounded-md leading-none ${
-            order.status === "pending"
-              ? "text-warning bg-warning/10"
-              : order.status === "delivered"
-              ? "text-success bg-success/10"
-              : order.status === "processing"
-              ? "text-indigo-500 bg-indigo-100"
-              : order.status === "cancel"
-              ? "text-danger bg-danger/10"
-              : ""
-          }  font-medium`}
+          className={`text-[11px] px-3 py-1 rounded-md leading-none ${statusBadgeClass(
+            order.status
+          )} font-medium`}
         >
-          {order.status}
+          {STATUS_LABELS[statusKey] || order.status}
         </span>
       </td>
       <td className="px-3 py-3">
-        <OrderStatusChange id={order._id} />
+        <OrderStatusChange id={order._id} currentStatus={order.status} />
       </td>
-      {/* order actions */}
       <OrderActions id={order._id} cls="px-3 py-3" />
-      {/* order actions */}
     </tr>
   );
 };

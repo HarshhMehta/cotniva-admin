@@ -63,12 +63,39 @@ export interface Order {
   totalAmount: number;
   shippingOption: string;
   paymentMethod: string;
+  paymentStatus?: string;
   orderNote?: string;
   adminNotes?: string;
   paymentIntent?: IPaymentIntent;
   cardInfo?: Record<string, unknown>;
   invoice: number;
   status: string;
+  trackingNumber?: string;
+  trackingUrl?: string;
+  statusHistory?: {
+    from?: string | null;
+    to?: string;
+    at?: string;
+    source?: string;
+    reason?: string;
+  }[];
+  cancellation?: {
+    reason?: string;
+    reasonCode?: string;
+    cancelledAt?: string;
+    cancelledByEmail?: string;
+  };
+  refund?: {
+    status?: string;
+    razorpayRefundId?: string;
+    amount?: number;
+    error?: string;
+    initiatedAt?: string;
+    completedAt?: string;
+  };
+  emailsSent?: Record<string, string>;
+  allowedNext?: string[];
+  canEmergencyCancel?: boolean;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -136,4 +163,21 @@ export interface IGetAllOrdersRes {
 export interface IUpdateStatusOrderRes {
   success: boolean;
   message: string;
+  order?: Order;
+  allowedNext?: string[];
+}
+
+export interface IEmergencyCancelRes {
+  success: boolean;
+  message: string;
+  order?: Order;
+  refund?: {
+    ok?: boolean;
+    status?: string;
+    refundId?: string;
+    error?: string;
+    skipped?: boolean;
+  };
+  alreadyCancelled?: boolean;
+  inventoryRestored?: boolean;
 }
