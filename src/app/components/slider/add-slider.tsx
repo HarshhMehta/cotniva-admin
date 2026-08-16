@@ -32,11 +32,11 @@ const AddSlider = () => {
               setImage={setMobileImg}
               image=""
               setIsSubmitted={setIsSubmitted}
-              label="Mobile Image (optional — portrait recommended)"
+              label="Mobile Image (optional — 1080×1440 or larger)"
               inputId="slider-mobile-img"
             />
             <p className="text-xs text-gray-500 -mt-4 mb-5">
-              If mobile image is empty, desktop image will be used on phones.
+              Portrait 1080×1440+ stays sharp on phones. If empty, desktop image is used.
             </p>
 
             <div className="mb-5">
