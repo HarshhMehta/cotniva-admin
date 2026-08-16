@@ -48,11 +48,14 @@ export default function EditSliderPage() {
               image={slider?.mobileImg || ""}
               default_img={slider?.mobileImg || ""}
               setIsSubmitted={setIsSubmitted}
-              label="Mobile Image (optional — 1080×1440 or larger)"
+              label="Mobile Image (required for sharp phones)"
               inputId="edit-slider-mobile-img"
+              minWidth={1080}
+              minHeight={1440}
+              hint="Export portrait at 1080×1440 or larger (not WhatsApp / chat compressed). Smaller files look blurry on phones."
             />
             <p className="text-xs text-gray-500 -mt-4 mb-5">
-              Portrait 1080×1440+ stays sharp on phones. If empty, desktop image is used.
+              If mobile image is empty, desktop image will be used on phones.
             </p>
 
             <div className="mb-4">
