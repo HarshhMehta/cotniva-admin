@@ -208,9 +208,3 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-
-/** Allow large multi-image FormData when creating/updating products */
-export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
-// Next.js App Router — raise request body ceiling for multi image uploads
-export const maxDuration = 60;
