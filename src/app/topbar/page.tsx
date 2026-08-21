@@ -6,7 +6,10 @@ import { notifyError, notifySuccess } from "@/utils/toast";
 const EMPTY_SLOTS = ["", "", ""];
 const MAX = 3;
 
-const normalizeSlots = (messages, text) => {
+const normalizeSlots = (
+  messages: unknown,
+  text: unknown
+): string[] => {
   const fromArr = Array.isArray(messages)
     ? messages.map((m) => String(m || "").trim()).filter(Boolean)
     : [];
@@ -46,7 +49,7 @@ export default function TopBarPage() {
       ? filled.join("  ·  ")
       : "Add messages below — preview appears here";
 
-  const setSlot = (index, value) => {
+  const setSlot = (index: number, value: string) => {
     setMessages((prev) => {
       const next = [...prev];
       next[index] = value;
