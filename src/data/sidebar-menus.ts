@@ -127,6 +127,12 @@ const sidebar_menu: Array<ISidebarMenus> = [
     title: "Top Bar",
   },
   {
+    id: 20,
+    icon: Setting,
+    link: "/welcome-popup",
+    title: "Welcome Popup",
+  },
+  {
     id: 19,
     icon: Setting,
     link: "/shipping",

@@ -121,25 +121,34 @@ export default function ProductForm({ productEdit }: IProps) {
     setIsModalOpen(true);
   };
 
-  const handleSaveVariant = (variantData: Variant) => {
-    if (!variantData.img) {
+  const handleSaveVariant = (variantList: Variant | Variant[]) => {
+    const list = Array.isArray(variantList) ? variantList : [variantList];
+    const valid = list.filter((v) => Boolean(v?.img));
+    if (!valid.length) {
       setVariantError("Gallery image is required");
       return;
     }
 
     let newVariants = [...variants];
+    let batch = valid.map((v) => ({ ...v }));
 
-    if (newVariants.length === 0) {
-      variantData.isDefault = true;
+    if (newVariants.length === 0 && !batch.some((v) => v.isDefault)) {
+      batch[0].isDefault = true;
     }
 
-    if (variantData.isDefault) {
-      newVariants = newVariants.map(v => ({ ...v, isDefault: false }));
+    if (batch.some((v) => v.isDefault)) {
+      newVariants = newVariants.map((v) => ({ ...v, isDefault: false }));
+      let sawDefault = false;
+      batch = batch.map((v) => {
+        if (v.isDefault && !sawDefault) {
+          sawDefault = true;
+          return v;
+        }
+        return { ...v, isDefault: false };
+      });
     }
 
-    newVariants.push(variantData);
-
-    setVariants(newVariants);
+    setVariants([...newVariants, ...batch]);
     setVariantError("");
   };
 
@@ -576,7 +585,7 @@ export default function ProductForm({ productEdit }: IProps) {
                 disabled={isSubmitting}
               >
                 <span className="text-lg">+</span>
-                Add image
+                Add images
               </button>
             </div>
 

@@ -5,13 +5,22 @@ import { Variant } from "@/types/product-type";
 interface VariantModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (variant: Variant) => void;
+  /** Called with one or more gallery variants (multi-select when adding) */
+  onSave: (variants: Variant[]) => void;
   editData?: Variant | null;
 }
 
-/** Gallery image modal — image, colour (for shop filter), default flag */
-export default function VariantModal({ isOpen, onClose, onSave, editData = null }: VariantModalProps) {
-  const [thumbnail, setThumbnail] = useState(editData?.img ? [editData.img] : null);
+/** Gallery image modal — image(s), colour (for shop filter), default flag */
+export default function VariantModal({
+  isOpen,
+  onClose,
+  onSave,
+  editData = null,
+}: VariantModalProps) {
+  const isEditing = Boolean(editData?.img);
+  const [thumbnail, setThumbnail] = useState<(File | string)[] | null>(
+    editData?.img ? [editData.img] : null
+  );
   const [isDefault, setIsDefault] = useState(editData?.isDefault || false);
   const [colorName, setColorName] = useState(editData?.color || "");
   const [colorCode, setColorCode] = useState(editData?.colorCode || "#4a1f1a");
@@ -25,18 +34,23 @@ export default function VariantModal({ isOpen, onClose, onSave, editData = null 
   }, [isOpen, editData]);
 
   const handleSave = () => {
-    if (!thumbnail) {
-      alert("Please select a gallery image");
+    const files = (thumbnail || []).filter(Boolean);
+    if (!files.length) {
+      alert("Please select at least one gallery image");
       return;
     }
 
-    onSave({
-      img: thumbnail[0],
-      color: colorName.trim(),
-      colorCode: colorName.trim() ? colorCode : "",
+    const color = colorName.trim();
+    const variants: Variant[] = files.map((img, index) => ({
+      img,
+      color,
+      colorCode: color ? colorCode : "",
       size: "",
-      isDefault,
-    });
+      // Only first image of a multi-batch can be marked default
+      isDefault: isDefault && index === 0,
+    }));
+
+    onSave(variants);
 
     setThumbnail(null);
     setIsDefault(false);
@@ -51,32 +65,44 @@ export default function VariantModal({ isOpen, onClose, onSave, editData = null 
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 w-full max-w-xl relative max-h-[90vh] overflow-y-auto">
         <button
+          type="button"
           onClick={onClose}
           className="absolute top-4 right-4 text-red p-3"
         >
           ✕
         </button>
 
-        <h2 className="text-xl font-semibold mb-4 text-gray-800">Gallery Image</h2>
+        <h2 className="text-xl font-semibold mb-4 text-gray-800">
+          {isEditing ? "Gallery Image" : "Gallery Images"}
+        </h2>
 
         <div className="space-y-4">
           <div>
             <label className="block font-medium text-gray-600 mb-2">
-              Select Image (Recommended: 570x510)
+              {isEditing
+                ? "Select Image (Recommended: 570x510)"
+                : "Select Images — you can pick many at once (Recommended: 570x510)"}
             </label>
             <ImageUpload
               images={thumbnail}
               setImages={setThumbnail}
-              multiple={false}
+              multiple={!isEditing}
             />
+            {!isEditing ? (
+              <p className="text-xs text-gray-500 mt-2">
+                Hold Ctrl/Cmd (or Shift) to select multiple files in the file
+                picker.
+              </p>
+            ) : null}
           </div>
 
           <div>
             <label className="block font-medium text-gray-600 mb-2">
-              Colour <span className="text-gray-400 font-normal">(for shop filter)</span>
+              Colour{" "}
+              <span className="text-gray-400 font-normal">(for shop filter)</span>
             </label>
             <p className="text-sm text-gray-500 mb-2">
-              Add a colour name + swatch so customers can filter by colour on Shop / New Arrival.
+              Optional — applied to all images selected in this batch.
             </p>
             <div className="flex gap-3 items-center">
               <input
@@ -105,16 +131,23 @@ export default function VariantModal({ isOpen, onClose, onSave, editData = null 
               className="w-4 h-4 text-theme border-gray2 rounded focus:ring-theme"
             />
             <label htmlFor="isDefault" className="text-gray-700">
-              Set as default / main image
+              {isEditing
+                ? "Set as default / main image"
+                : "Set first selected image as default / main"}
             </label>
           </div>
         </div>
 
         <button
+          type="button"
           onClick={handleSave}
           className="mt-6 w-full bg-theme text-white py-2.5 rounded-lg hover:bg-themeDark transition-colors font-medium"
         >
-          Save Image
+          {isEditing
+            ? "Save Image"
+            : (thumbnail || []).length > 1
+              ? `Save ${(thumbnail || []).length} Images`
+              : "Save Image"}
         </button>
       </div>
     </div>

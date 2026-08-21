@@ -6,7 +6,7 @@ interface ImageUploadProps {
   label?: string;
   required?: boolean;
   images?: (File | string)[] | null;
-  setImages: (files: File[] | null) => void;
+  setImages: (files: (File | string)[] | null) => void;
   multiple?: boolean;
   showTitle?: boolean;
   setColor?: (color: string) => void;
@@ -67,16 +67,24 @@ export default function ImageUpload({
     const files = event.target.files ? Array.from(event.target.files) : [];
 
     if (multiple) {
-      setImages(files);
-      // Revoke previous URLs before setting new ones
-      previews.forEach((url) => URL.revokeObjectURL(url));
-      setPreviews(files.map((file) => URL.createObjectURL(file)));
+      // Append to existing selection so users can add more batches
+      const existing = (images || []).filter(
+        (f): f is File | string => Boolean(f)
+      );
+      const merged = [...existing, ...files];
+      setImages(merged.length ? merged : null);
+      previews.forEach((url) => {
+        if (url.startsWith("blob:")) URL.revokeObjectURL(url);
+      });
+      setPreviews(
+        merged.map((file) =>
+          typeof file === "string" ? file : URL.createObjectURL(file)
+        )
+      );
     } else {
       const file = files.length > 0 ? files[0] : null;
-      console.log(file,'file');
 
-      // Revoke previous preview URL if any
-      if (previews.length > 0) {
+      if (previews.length > 0 && previews[0].startsWith("blob:")) {
         URL.revokeObjectURL(previews[0]);
       }
       setImages(file ? [file] : null);
@@ -146,15 +154,19 @@ export default function ImageUpload({
                         type="button"
                         onClick={() => {
                           setPreviews((prevPreviews) => {
-                            if (!isCloudinaryImage) {
-                              URL.revokeObjectURL(prevPreviews[index]);
-                            }
-                            if (fileInputRef.current) {
-                              fileInputRef.current.value = "";
+                            const url = prevPreviews[index];
+                            if (url?.startsWith("blob:")) {
+                              URL.revokeObjectURL(url);
                             }
                             return prevPreviews.filter((_, i) => i !== index);
                           });
-                          setImages(null);
+                          const next = (images || []).filter(
+                            (_, i) => i !== index
+                          );
+                          setImages(next.length ? next : null);
+                          if (fileInputRef.current && !multiple) {
+                            fileInputRef.current.value = "";
+                          }
                         }}
                         className="absolute top-0 right-0 inline-flex items-center justify-center duration-200 ease-out border rounded-lg size-8 bg-gray border-gray3 hover:bg-red-light-6 hover:border-red-light-4 hover:text-red p-1"
                       >
