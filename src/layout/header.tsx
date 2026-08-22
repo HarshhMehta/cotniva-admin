@@ -10,6 +10,7 @@ import default_user from "@assets/img/users/user-10.jpg";
 import NotificationArea from "./component/notification-area";
 import BrandLogo from "./component/brand-logo";
 import { userLoggedOut } from "@/redux/auth/authSlice";
+import { useLogoutAdminMutation } from "@/redux/auth/authApi";
 
 // prop type
 type IProps = {
@@ -26,10 +27,14 @@ const Header = ({ setSideMenu }: IProps) => {
 
   const dispatch = useDispatch();
   const router = useRouter();
+  const [logoutAdmin] = useLogoutAdminMutation();
 
-  // handle logout
-  const handleLogOut = () => {
-    dispatch(userLoggedOut());
+  const handleLogOut = async () => {
+    try {
+      await logoutAdmin().unwrap();
+    } catch {
+      dispatch(userLoggedOut());
+    }
     router.push(`/login`);
   };
 

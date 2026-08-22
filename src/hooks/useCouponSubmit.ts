@@ -2,100 +2,154 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { notifyError, notifySuccess } from "@/utils/toast";
-import { useAddCouponMutation, useEditCouponMutation, useGetCouponQuery } from "@/redux/coupon/couponApi";
+import {
+  useAddCouponMutation,
+  useEditCouponMutation,
+} from "@/redux/coupon/couponApi";
 import dayjs from "dayjs";
+import { CouponCategoryOption } from "@/app/components/coupon/coupon-category-select";
+
+/** Accepts "10", "10%", "10.5" → number; invalid → NaN */
+const parseNumberInput = (raw: unknown): number => {
+  if (typeof raw === "number") return raw;
+  const cleaned = String(raw ?? "")
+    .replace(/%/g, "")
+    .replace(/,/g, "")
+    .replace(/[^\d.-]/g, "")
+    .trim();
+  if (!cleaned) return NaN;
+  return Number(cleaned);
+};
 
 const useCouponSubmit = () => {
-  const [logo, setLogo] = useState<string>("");
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
   const [openSidebar, setOpenSidebar] = useState<boolean>(false);
-  const [selectProductType, setSelectProductType] = useState<string>("");
+  const [neverExpires, setNeverExpires] = useState<boolean>(false);
+  const [selectedCategories, setSelectedCategories] = useState<
+    CouponCategoryOption[]
+  >([]);
   const [editId, setEditId] = useState<string>("");
   const router = useRouter();
 
-  // add coupon
-  const [addCoupon, { }] = useAddCouponMutation();
-  // edit coupon
-  const [editCoupon, { }] = useEditCouponMutation();
-  // react hook form
+  const [addCoupon] = useAddCouponMutation();
+  const [editCoupon] = useEditCouponMutation();
+
   const {
     register,
     handleSubmit,
     formState: { errors },
     reset,
     control,
+    setValue,
   } = useForm();
-
 
   useEffect(() => {
     if (!openSidebar) {
-      setLogo("")
-      setSelectProductType("");
+      setNeverExpires(false);
+      setSelectedCategories([]);
       reset();
     }
-  }, [openSidebar, reset])
-  // submit handle
+  }, [openSidebar, reset]);
+
+  const buildPayload = (data: any) => {
+    const cats = selectedCategories.filter((c) => c.value !== "all");
+    const isAll =
+      selectedCategories.length === 0 ||
+      selectedCategories.some((c) => c.value === "all");
+    return {
+      logo: "",
+      title: data?.name,
+      couponCode: data?.code,
+      neverExpires,
+      endTime: neverExpires
+        ? null
+        : data?.endtime
+          ? dayjs(data.endtime).format("YYYY-MM-DDTHH:mm:ss.SSSZ")
+          : null,
+      discountPercentage: parseNumberInput(data?.discountpercentage),
+      minimumAmount: parseNumberInput(data?.minimumamount) || 0,
+      productType: "all",
+      applicableCategories: isAll ? [] : cats.map((c) => c.value),
+    };
+  };
+
   const handleCouponSubmit = async (data: any) => {
     try {
-      const coupon_data = {
-        logo: logo,
-        title: data?.name,
-        couponCode: data?.code,
-        endTime: dayjs(data.endtime).format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
-        discountPercentage: data?.discountpercentage,
-        minimumAmount: data?.minimumamount,
-        productType: selectProductType,
-      };
-
-      console.log(coupon_data)
+      if (!neverExpires && !data?.endtime) {
+        return notifyError("Please select an end date or enable Never Expire");
+      }
+      const coupon_data = buildPayload(data);
+      if (
+        !Number.isFinite(coupon_data.discountPercentage) ||
+        coupon_data.discountPercentage <= 0
+      ) {
+        return notifyError("Enter a valid discount percentage (e.g. 10)");
+      }
+      if (
+        !Number.isFinite(coupon_data.minimumAmount) ||
+        coupon_data.minimumAmount < 0
+      ) {
+        return notifyError("Enter a valid minimum amount (e.g. 500)");
+      }
       const res = await addCoupon({ ...coupon_data });
       if ("error" in res) {
         if ("data" in res.error) {
-          const errorData = res.error.data as { message?: string };
+          const errorData = res.error.data as {
+            message?: string;
+            errorMessages?: Array<{ message?: string }>;
+          };
           if (typeof errorData.message === "string") {
             return notifyError(errorData.message);
           }
+          const first = errorData.errorMessages?.[0]?.message;
+          if (first) return notifyError(first);
         }
-      } else {
-        notifySuccess("Coupon added successfully");
-        setIsSubmitted(true);
-        setLogo("")
-        setOpenSidebar(false);
-        setSelectProductType("");
-        reset();
+        return notifyError("Failed to add coupon");
       }
+      notifySuccess("Coupon added successfully");
+      setIsSubmitted(true);
+      setOpenSidebar(false);
+      setNeverExpires(false);
+      setSelectedCategories([]);
+      reset();
     } catch (error) {
       console.log(error);
       notifyError("Something went wrong");
     }
   };
 
-   //handle Submit edit Category
-   const handleSubmitEditCoupon = async (data: any, id: string) => {
+  const handleSubmitEditCoupon = async (data: any, id: string) => {
     try {
-      const coupon_data = {
-        logo: logo,
-        title: data?.name,
-        couponCode: data?.code,
-        endTime: dayjs(data.endtime).format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
-        discountPercentage: data?.discountpercentage,
-        minimumAmount: data?.minimumamount,
-        productType: selectProductType,
-      };
+      if (!neverExpires && !data?.endtime) {
+        return notifyError("Please select an end date or enable Never Expire");
+      }
+
+      const coupon_data = buildPayload(data);
+      if (
+        !Number.isFinite(coupon_data.discountPercentage) ||
+        coupon_data.discountPercentage <= 0
+      ) {
+        return notifyError("Enter a valid discount percentage (e.g. 10)");
+      }
       const res = await editCoupon({ id, data: coupon_data });
       if ("error" in res) {
         if ("data" in res.error) {
-          const errorData = res.error.data as { message?: string };
+          const errorData = res.error.data as {
+            message?: string;
+            errorMessages?: Array<{ message?: string }>;
+          };
           if (typeof errorData.message === "string") {
             return notifyError(errorData.message);
           }
+          const first = errorData.errorMessages?.[0]?.message;
+          if (first) return notifyError(first);
         }
-      } else {
-        notifySuccess("Coupon update successfully");
-        router.push('/coupon')
-        setIsSubmitted(true);
-        reset();
+        return notifyError("Failed to update coupon");
       }
+      notifySuccess("Coupon updated successfully");
+      router.push("/coupon");
+      setIsSubmitted(true);
+      reset();
     } catch (error) {
       console.log(error);
       notifyError("Something went wrong");
@@ -106,16 +160,17 @@ const useCouponSubmit = () => {
     handleCouponSubmit,
     isSubmitted,
     setIsSubmitted,
-    logo,
-    setLogo,
     register,
     handleSubmit,
     errors,
     openSidebar,
     setOpenSidebar,
     control,
-    selectProductType,
-    setSelectProductType,
+    setValue,
+    neverExpires,
+    setNeverExpires,
+    selectedCategories,
+    setSelectedCategories,
     handleSubmitEditCoupon,
     setEditId,
   };

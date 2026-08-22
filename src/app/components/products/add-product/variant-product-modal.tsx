@@ -10,7 +10,7 @@ interface VariantModalProps {
   editData?: Variant | null;
 }
 
-/** Gallery image modal — image(s), colour (for shop filter), default flag */
+/** Gallery image modal — image(s), colour (for shop filter), default + hover flags */
 export default function VariantModal({
   isOpen,
   onClose,
@@ -22,6 +22,7 @@ export default function VariantModal({
     editData?.img ? [editData.img] : null
   );
   const [isDefault, setIsDefault] = useState(editData?.isDefault || false);
+  const [isHover, setIsHover] = useState(editData?.isHover || false);
   const [colorName, setColorName] = useState(editData?.color || "");
   const [colorCode, setColorCode] = useState(editData?.colorCode || "#4a1f1a");
 
@@ -29,6 +30,7 @@ export default function VariantModal({
     if (!isOpen) return;
     setThumbnail(editData?.img ? [editData.img] : null);
     setIsDefault(editData?.isDefault || false);
+    setIsHover(editData?.isHover || false);
     setColorName(editData?.color || "");
     setColorCode(editData?.colorCode || "#4a1f1a");
   }, [isOpen, editData]);
@@ -46,14 +48,16 @@ export default function VariantModal({
       color,
       colorCode: color ? colorCode : "",
       size: "",
-      // Only first image of a multi-batch can be marked default
+      // Only first image of a multi-batch can be marked default / hover
       isDefault: isDefault && index === 0,
+      isHover: isHover && index === 0,
     }));
 
     onSave(variants);
 
     setThumbnail(null);
     setIsDefault(false);
+    setIsHover(false);
     setColorName("");
     setColorCode("#4a1f1a");
     onClose();
@@ -136,6 +140,25 @@ export default function VariantModal({
                 : "Set first selected image as default / main"}
             </label>
           </div>
+
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              id="isHover"
+              checked={isHover}
+              onChange={(e) => setIsHover(e.target.checked)}
+              className="w-4 h-4 text-theme border-gray2 rounded focus:ring-theme"
+            />
+            <label htmlFor="isHover" className="text-gray-700">
+              {isEditing
+                ? "Set as hover image (product card hover)"
+                : "Set first selected image as hover image"}
+            </label>
+          </div>
+          <p className="text-xs text-gray-500 -mt-2 ml-6">
+            If no hover image is set, the storefront uses the second gallery
+            image by default.
+          </p>
         </div>
 
         <button

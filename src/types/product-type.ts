@@ -136,6 +136,7 @@ export interface Variant {
   colorCode?: string;
   size: string;
   isDefault: boolean;
+  isHover?: boolean;
 }
 
 export interface ProductFormData {

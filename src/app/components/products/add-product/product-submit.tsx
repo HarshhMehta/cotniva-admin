@@ -4,6 +4,7 @@
 import { AdditionalInfo, ProductFormData, Variant } from "@/types/product-type";
 import { useState, useEffect, useMemo } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
+import { adminFetchInit, API_BASE } from "@/utils/admin-auth-headers";
 import VariantModal from "./variant-product-modal";
 import Breadcrumb from "../../breadcrumb/breadcrumb";
 import ProductCategory from "../../category/product-category";
@@ -148,6 +149,18 @@ export default function ProductForm({ productEdit }: IProps) {
       });
     }
 
+    if (batch.some((v) => v.isHover)) {
+      newVariants = newVariants.map((v) => ({ ...v, isHover: false }));
+      let sawHover = false;
+      batch = batch.map((v) => {
+        if (v.isHover && !sawHover) {
+          sawHover = true;
+          return v;
+        }
+        return { ...v, isHover: false };
+      });
+    }
+
     setVariants([...newVariants, ...batch]);
     setVariantError("");
   };
@@ -155,6 +168,22 @@ export default function ProductForm({ productEdit }: IProps) {
 
   const handleRemoveVariant = (index: number) => {
     setVariants(variants.filter((_, i) => i !== index));
+  };
+
+  const setVariantAsDefault = (index: number) => {
+    setVariants((prev) =>
+      prev.map((v, i) => ({ ...v, isDefault: i === index }))
+    );
+  };
+
+  const setVariantAsHover = (index: number) => {
+    setVariants((prev) =>
+      prev.map((v, i) => ({
+        ...v,
+        // Toggle off if already hover; otherwise set this one only
+        isHover: i === index ? !v.isHover : false,
+      }))
+    );
   };
 
   const handleAddAdditionalInfo = () => {
@@ -218,6 +247,7 @@ export default function ProductForm({ productEdit }: IProps) {
         img: imgObj.img ?? "",
         size: "",
         isDefault: !!imgObj.isDefault,
+        isHover: !!imgObj.isHover,
       }));
       setVariants(v);
     } else {
@@ -284,97 +314,126 @@ export default function ProductForm({ productEdit }: IProps) {
     setIsSubmitting(true);
 
     try {
-      // Create FormData object
-      const formData = new FormData();
+      const apiBase = API_BASE;
+      const isEdit = Boolean(productEdit && productEdit._id);
 
-      // Add basic fields
-      formData.append("title", data.title);
-      formData.append("sku", data.sku || "");
-      formData.append("unit", data.unit);
-      formData.append("price", data.price.toString());
-      formData.append("discount", (data.discount_percentage || 0).toString());
-      formData.append(
-        "quantity",
-        (productSizes.length > 0 ? sizeStockTotal : data.quantity).toString()
+      const imageURLs = await Promise.all(
+        variants.map(async (variant, index) => {
+          let imageUrl =
+            typeof variant.img === "string" ? variant.img : "";
+
+          if (variant.img instanceof File) {
+            const uploadData = new FormData();
+            uploadData.append("image", variant.img);
+            const uploadRes = await fetch(`${apiBase}/api/cloudinary/add-img`, {
+              method: "POST",
+              body: uploadData,
+              credentials: "include",
+            });
+            const uploadJson = await uploadRes.json();
+            if (!uploadRes.ok || !uploadJson?.data?.url) {
+              throw new Error(
+                uploadJson?.message ||
+                  `Failed to upload image for variant ${index + 1}`
+              );
+            }
+            imageUrl = uploadJson.data.url;
+          }
+
+          return {
+            img: imageUrl,
+            isDefault: variant.isDefault || false,
+            isHover: variant.isHover || false,
+            ...(variant.color
+              ? {
+                  color: {
+                    name: variant.color,
+                    clrCode: variant.colorCode || "",
+                  },
+                }
+              : {}),
+          };
+        })
       );
-      formData.append("parent", data.parent);
-      formData.append("children", "");
-      formData.append("status", data.status);
-      formData.append("productType", "general");
-      formData.append("newArrival", data.newArrival ? "true" : "false");
-      formData.append("bestSeller", data.bestSeller ? "true" : "false");
-      formData.append("description", data.description);
-      formData.append("productHighlights", data.productHighlights || "");
-      formData.append("fabricCare", data.fabricCare || "");
-      formData.append("fitSizing", data.fitSizing || "");
-      formData.append("videoId", data.youtube_video_Id || "");
-      formData.append("featured", data.featured ? "true" : "false");
 
-      formData.append("brand", JSON.stringify({
-        name: "",
-        id: null,
-      }));
+      const hasDefault = imageURLs.some((img) => img.isDefault === true);
+      if (!hasDefault && imageURLs.length > 0) {
+        imageURLs[0].isDefault = true;
+      }
 
-      formData.append("category", JSON.stringify({
-        name: data.category?.name,
-        id: data.category?.id,
-      }));
+      // Ensure at most one hover image
+      let sawHover = false;
+      for (const img of imageURLs) {
+        if (img.isHover && !sawHover) {
+          sawHover = true;
+        } else {
+          img.isHover = false;
+        }
+      }
 
-      formData.append("offerDate", JSON.stringify({
-        startDate: data.offerStartDate || null,
-        endDate: data.offerEndDate || null,
-      }));
+      const productPayload: Record<string, unknown> = {
+        sku: data.sku || "",
+        title: data.title,
+        slug: data.title.toLowerCase().replace(/\s+/g, "-"),
+        unit: data.unit,
+        imageURLs,
+        parent: data.parent,
+        children: "",
+        price: Number(data.price),
+        discount: Number(data.discount_percentage) || 0,
+        quantity: Number(
+          productSizes.length > 0 ? sizeStockTotal : data.quantity
+        ),
+        brand: { name: "", id: null },
+        category: {
+          name: data.category?.name,
+          id: data.category?.id,
+        },
+        status: data.status,
+        productType: "general",
+        description: data.description,
+        productHighlights: data.productHighlights || "",
+        fabricCare: data.fabricCare || "",
+        fitSizing: data.fitSizing || "",
+        videoId: data.youtube_video_Id || "",
+        additionalInformation: additionalInfo.filter(
+          (info) => info.key?.trim() && info.value?.trim()
+        ),
+        tags: data.tags ? data.tags.split(",").map((t) => t.trim()) : [],
+        sizes: productSizes,
+        sizeGuide: selectedSizeGuide || null,
+        offerDate: {
+          startDate: data.offerStartDate || null,
+          endDate: data.offerEndDate || null,
+        },
+        featured: data.featured || false,
+        newArrival: data.newArrival || false,
+        bestSeller: data.bestSeller || false,
+      };
 
-      const tags = data.tags ? data.tags.split(",").map((t) => t.trim()) : [];
-      formData.append("tags", JSON.stringify(tags));
-
-      const additionalInformation = additionalInfo.filter(
-        (info) => info.key?.trim() && info.value?.trim()
-      );
-      formData.append("additionalInformation", JSON.stringify(additionalInformation));
-
-      const variantsData = variants.map((v) => ({
-        color: v.color || "",
-        colorCode: v.colorCode || "",
-        size: "",
-        isDefault: v.isDefault || false,
-        img: typeof v.img === "string" ? v.img : "",
-      }));
-      formData.append("variants", JSON.stringify(variantsData));
-      formData.append("sizes", JSON.stringify(productSizes));
       const sizesChanged =
         JSON.stringify([...productSizes].sort()) !==
         JSON.stringify([...initialSizes].sort());
-      if (!productEdit?._id || sizeStockDirty || sizesChanged) {
-        formData.append("sizeInventory", JSON.stringify(sizeInventoryPayload));
-      }
-      formData.append("sizeGuide", selectedSizeGuide || "");
-
-      if (productEdit && productEdit._id) {
-        const oldImages = (productEdit.imageURLs || []).map((img: any) => img.img);
-        formData.append("oldImages", JSON.stringify(oldImages));
+      if (!isEdit || sizeStockDirty || sizesChanged) {
+        productPayload.sizeInventory = sizeInventoryPayload;
       }
 
-      variants.forEach((variant, index) => {
-        if (variant.img instanceof File) {
-          formData.append(`variant_image_${index}`, variant.img);
-        }
-      });
+      const productUrl = isEdit
+        ? `${apiBase}/api/product/edit-product/${productEdit._id}`
+        : `${apiBase}/api/product/add`;
 
-      const apiUrl = "/api/product";
-      const method = "POST";
-      if (productEdit && productEdit._id) {
-        formData.append("productId", String(productEdit._id));
-      }
-
-      const response = await fetch(apiUrl, {
-        method,
-        body: formData,
-      });
+      const response = await fetch(
+        productUrl,
+        adminFetchInit({
+          method: isEdit ? "PATCH" : "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(productPayload),
+        })
+      );
 
       const result = await response.json();
 
-      if (!response.ok || !result.success) {
+      if (!response.ok) {
         const message = result.message || "Failed to save product";
         notifyError(typeof message === "string" ? message : "Failed to save product");
         return;
@@ -605,7 +664,10 @@ export default function ProductForm({ productEdit }: IProps) {
                         Colour
                       </th>
                       <th className="text-left py-3 px-4 font-medium text-gray-600">
-                        Default
+                        Main
+                      </th>
+                      <th className="text-left py-3 px-4 font-medium text-gray-600">
+                        Hover
                       </th>
                       <th className="text-left py-3 px-4 font-medium text-gray-600">
                         Action
@@ -640,21 +702,34 @@ export default function ProductForm({ productEdit }: IProps) {
                           )}
                         </td>
                         <td className="py-3 px-4">
-                          {variant.isDefault && (
-                            <span className="inline-flex items-center justify-center w-5 h-5 bg-theme rounded">
-                              <svg
-                                className="w-3 h-3 text-white"
-                                fill="currentColor"
-                                viewBox="0 0 20 20"
-                              >
-                                <path
-                                  fillRule="evenodd"
-                                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                  clipRule="evenodd"
-                                />
-                              </svg>
-                            </span>
-                          )}
+                          <button
+                            type="button"
+                            title="Set as main image"
+                            onClick={() => setVariantAsDefault(index)}
+                            disabled={isSubmitting}
+                            className={`inline-flex items-center justify-center w-7 h-7 rounded border transition-colors ${
+                              variant.isDefault
+                                ? "bg-theme border-theme text-white"
+                                : "bg-white border-gray-300 text-gray-400 hover:border-theme"
+                            }`}
+                          >
+                            {variant.isDefault ? "✓" : ""}
+                          </button>
+                        </td>
+                        <td className="py-3 px-4">
+                          <button
+                            type="button"
+                            title="Set as hover image (click again to clear)"
+                            onClick={() => setVariantAsHover(index)}
+                            disabled={isSubmitting}
+                            className={`inline-flex items-center justify-center w-7 h-7 rounded border transition-colors ${
+                              variant.isHover
+                                ? "bg-theme border-theme text-white"
+                                : "bg-white border-gray-300 text-gray-400 hover:border-theme"
+                            }`}
+                          >
+                            {variant.isHover ? "✓" : ""}
+                          </button>
                         </td>
                         <td className="py-3 px-4">
                           <button
@@ -670,6 +745,10 @@ export default function ProductForm({ productEdit }: IProps) {
                     ))}
                   </tbody>
                 </table>
+                <p className="text-xs text-gray-500 px-4 py-2 bg-white border-t border-gray2">
+                  Main = default card image. Hover = image on mouse hover. If Hover
+                  is not set, storefront uses the second gallery image.
+                </p>
               </div>
             )}
           </div>

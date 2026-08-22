@@ -10,26 +10,25 @@ const CouponArea = () => {
     handleCouponSubmit,
     errors,
     handleSubmit,
-    isSubmitted,
-    logo,
     openSidebar,
     register,
-    setIsSubmitted,
-    setLogo,
     setOpenSidebar,
     control,
-    setSelectProductType,
+    neverExpires,
+    setNeverExpires,
+    selectedCategories,
+    setSelectedCategories,
   } = useCouponSubmit();
-  const [searchValue,setSearchValue] = useState<string>("");
-  const [selectValue,setSelectValue] = useState<string>("");
-  // handle search value
-  const handleSearchValue = (e:React.ChangeEvent<HTMLInputElement>) => {
-    setSearchValue(e.target.value)
-  }
-  // handle select value
-  const handleSelectValue = (e:React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectValue(e.target.value)
-  }
+  const [searchValue, setSearchValue] = useState<string>("");
+  const [selectValue, setSelectValue] = useState<string>("");
+
+  const handleSearchValue = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchValue(e.target.value);
+  };
+  const handleSelectValue = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectValue(e.target.value);
+  };
+
   return (
     <>
       <div className="bg-white rounded-t-md rounded-b-md shadow-xs py-4">
@@ -78,24 +77,21 @@ const CouponArea = () => {
         </div>
       </div>
 
-      {/* coupon offcanvas start */}
       <CouponOffcanvas
         propsItems={{
           openSidebar,
           setOpenSidebar,
-          setLogo,
-          logo,
           handleCouponSubmit,
           handleSubmit,
           register,
           errors,
-          isSubmitted,
-          setIsSubmitted,
           control,
-          setSelectProductType,
+          neverExpires,
+          setNeverExpires,
+          selectedCategories,
+          setSelectedCategories,
         }}
       />
-      {/* coupon offcanvas end */}
     </>
   );
 };
