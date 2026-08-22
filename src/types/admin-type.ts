@@ -4,6 +4,7 @@ export interface IAdminRegisterAdd {
   name: string;
   email: string;
   password: string;
+  bootstrapSecret?: string;
 }
 
 // admin add
@@ -13,23 +14,26 @@ export interface IAdminLoginAdd {
 }
 
 export interface IAdminLoginRes {
-  _id: string;
-  token: string;
-  name: string;
-  image?: string;
-  email: string;
-  phone?: string;
-  role?: string;
+  success?: boolean;
+  user: {
+    _id: string;
+    name: string;
+    image?: string;
+    email: string;
+    phone?: string;
+    role?: string;
+  };
 }
 
 // Admin RegisterRes
 export interface IAdminRegisterRes {
-  token: string;
-  _id: string;
-  name: string;
-  email: string;
-  role: string;
-  joiningData: string;
+  success?: boolean;
+  user: {
+    _id: string;
+    name: string;
+    email: string;
+    role: string;
+  };
 }
 
 export interface IAdminUpdate {
@@ -42,13 +46,15 @@ export interface IAdminUpdate {
 }
 
 export interface IAdminUpdateRes {
-  token: string;
-  _id: string;
-  name: string;
-  image: string;
-  email: string;
-  phone: string;
-  role: string;
+  success?: boolean;
+  user: {
+    _id: string;
+    name: string;
+    image?: string;
+    email: string;
+    phone?: string;
+    role?: string;
+  };
 }
 
 export interface IAddStuff {

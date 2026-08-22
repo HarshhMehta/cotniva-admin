@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import Wrapper from "@/layout/wrapper";
 import GlobalImgUpload from "@/app/components/category/global-img-upload";
 import { notifyError, notifySuccess } from "@/utils/toast";
+import { adminFetchInit } from "@/utils/admin-auth-headers";
 
 const DEFAULTS = {
   isActive: true,
@@ -58,7 +59,7 @@ export default function WelcomePopupPage() {
     try {
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/welcome-popup/update`,
-        {
+        adminFetchInit({
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -72,7 +73,7 @@ export default function WelcomePopupPage() {
             buttonText: form.buttonText.trim() || "SHOP NOW",
             buttonLink: form.buttonLink.trim() || "/shop",
           }),
-        }
+        })
       );
       const data = await res.json();
       if (data.success) {

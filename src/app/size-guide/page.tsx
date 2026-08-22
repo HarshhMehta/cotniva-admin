@@ -3,6 +3,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import Wrapper from "@/layout/wrapper";
 import { notifyError, notifySuccess } from "@/utils/toast";
 import GalleryMediaUpload from "../components/gallery/gallery-media-upload";
+import { adminFetchInit } from "@/utils/admin-auth-headers";
 
 const API = () => `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/size-guide`;
 
@@ -55,7 +56,7 @@ export default function SizeGuidePage() {
 
   const load = useCallback(async () => {
     try {
-      const res = await fetch(`${API()}/all`);
+      const res = await fetch(`${API()}/all`, adminFetchInit());
       const data = await res.json();
       if (data.success) setList(data.data || []);
     } catch {
@@ -189,11 +190,14 @@ export default function SizeGuidePage() {
     try {
       const url = editId ? `${API()}/edit/${editId}` : `${API()}/add`;
       const method = editId ? "PATCH" : "POST";
-      const res = await fetch(url, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
+      const res = await fetch(
+        url,
+        adminFetchInit({
+          method,
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(form),
+        })
+      );
       const data = await res.json();
       if (!res.ok || !data.success) {
         notifyError(data.message || "Save failed");
@@ -212,7 +216,10 @@ export default function SizeGuidePage() {
   const handleDelete = async (id: string) => {
     if (!confirm("Delete this size guide?")) return;
     try {
-      const res = await fetch(`${API()}/delete/${id}`, { method: "DELETE" });
+      const res = await fetch(
+        `${API()}/delete/${id}`,
+        adminFetchInit({ method: "DELETE" })
+      );
       const data = await res.json();
       if (data.success) {
         notifySuccess("Deleted");

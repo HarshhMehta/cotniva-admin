@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import Wrapper from "@/layout/wrapper";
 import { notifyError, notifySuccess } from "@/utils/toast";
+import { adminFetchInit } from "@/utils/admin-auth-headers";
 
 const EMPTY_SLOTS = ["", "", ""];
 const MAX = 3;
@@ -66,7 +67,7 @@ export default function TopBarPage() {
     try {
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/topbar/update`,
-        {
+        adminFetchInit({
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -76,7 +77,7 @@ export default function TopBarPage() {
             textColor,
             isActive,
           }),
-        }
+        })
       );
       const data = await res.json();
       if (data.success) {

@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import Image from "next/image";
 import dayjs from "dayjs";
 // internal
 import Loading from "../common/loading";
@@ -86,20 +85,9 @@ const CouponTable = ({cls,setOpenSidebar,selectValue,searchValue}: IPropType) =>
                   className="bg-white border-b border-gray6 last:border-0 text-start mx-9"
                 >
                   <td className="pr-8 py-5 whitespace-nowrap">
-                    <div className="flex items-center space-x-5">
-                      {coupon?.logo && (
-                        <Image
-                          className="w-[60px] h-[60px] rounded-md"
-                          src={coupon.logo}
-                          alt="logo"
-                          width={60}
-                          height={60}
-                        />
-                      )}
-                      <span className="font-medium text-heading">
-                        {coupon.title}
-                      </span>
-                    </div>
+                    <span className="font-medium text-heading">
+                      {coupon.title}
+                    </span>
                   </td>
                   <td className="px-3 py-3 text-black font-normal text-end">
                     <span className="uppercase rounded-md px-3 py-1 bg-gray">
@@ -112,12 +100,16 @@ const CouponTable = ({cls,setOpenSidebar,selectValue,searchValue}: IPropType) =>
                   <td className="px-3 py-3 font-normal text-[#55585B] text-end">
                     <span
                       className={`text-[11px] px-3 py-1 rounded-md leading-none font-medium text-end ${
+                        !coupon.neverExpires &&
+                        coupon.endTime &&
                         dayjs().isAfter(dayjs(coupon.endTime))
                           ? "text-danger bg-danger/10"
                           : "text-success bg-success/10"
                       }`}
                     >
-                      {dayjs().isAfter(dayjs(coupon.endTime))
+                      {!coupon.neverExpires &&
+                      coupon.endTime &&
+                      dayjs().isAfter(dayjs(coupon.endTime))
                         ? "Expired"
                         : "Active"}
                     </span>
@@ -127,7 +119,9 @@ const CouponTable = ({cls,setOpenSidebar,selectValue,searchValue}: IPropType) =>
                     {dayjs(coupon.createdAt).format("MMM D, YYYY")}
                   </td>
                   <td className="px-3 py-3 text-end">
-                    {dayjs(coupon.endTime).format("MMM D, YYYY")}
+                    {coupon.neverExpires || !coupon.endTime
+                      ? "Never"
+                      : dayjs(coupon.endTime).format("MMM D, YYYY")}
                   </td>
                   <td className="px-9 py-3 text-end">
                     <CouponAction

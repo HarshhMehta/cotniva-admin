@@ -86,6 +86,7 @@ export async function POST(request: NextRequest) {
         return {
           img: imageUrl,
           isDefault: variant.isDefault || false,
+          isHover: variant.isHover || false,
           ...(variant.color
             ? {
                 color: {
@@ -161,6 +162,7 @@ export async function POST(request: NextRequest) {
 
     const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL;
     const isEdit = Boolean(productId);
+    const authHeader = request.headers.get("authorization") || "";
     const response = await fetch(
       isEdit
         ? `${apiBase}/api/product/edit-product/${productId}`
@@ -169,6 +171,7 @@ export async function POST(request: NextRequest) {
         method: isEdit ? "PATCH" : "POST",
         headers: {
           "Content-Type": "application/json",
+          ...(authHeader ? { Authorization: authHeader } : {}),
         },
         body: JSON.stringify(productPayload),
       }

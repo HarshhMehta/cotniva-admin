@@ -104,6 +104,7 @@ export async function PUT(
         return {
           img: imageUrl,
           isDefault: variant.isDefault || false,
+          isHover: variant.isHover || false,
           ...(variant.color
             ? {
                 color: {
@@ -173,10 +174,12 @@ export async function PUT(
     }
 
     // Send to external server
+    const authHeader = request.headers.get("authorization") || "";
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/product/edit-product/${productId}`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
+        ...(authHeader ? { Authorization: authHeader } : {}),
       },
       body: JSON.stringify(productPayload),
     });

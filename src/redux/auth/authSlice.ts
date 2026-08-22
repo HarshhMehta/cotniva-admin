@@ -1,61 +1,35 @@
-import { createSlice } from "@reduxjs/toolkit";
-import Cookies from "js-cookie";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-// user type
-type IUser = {
+export type IUser = {
   _id: string;
   name: string;
   email: string;
-  role?: string | undefined;
-  image?: string | undefined;
-  phone?: string | undefined;
-};
-type IAuth = {
-  accessToken: string;
-  user: IUser;
+  role?: string;
+  image?: string;
+  phone?: string;
 };
 
-// Check if the cookie exists
-const cookieData = Cookies.get("admin");
-let initialAuthState: {
-  accessToken: string | undefined;
+type AuthState = {
   user: IUser | undefined;
-} = {
-  accessToken: undefined,
-  user: undefined,
+  authenticated: boolean;
 };
 
-// If the cookie exists, parse its value and set it as the initial state
-if (cookieData) {
-  try {
-    const parsedData: { accessToken: string; user: IUser } = JSON.parse(cookieData);
-    initialAuthState = {
-      accessToken: parsedData.accessToken,
-      user: parsedData.user,
-    };
-  } catch (error) {
-    console.error("Error parsing cookie data:", error);
-  }
-}
+const initialState: AuthState = {
+  user: undefined,
+  authenticated: false,
+};
 
 const authSlice = createSlice({
   name: "auth",
-  initialState:initialAuthState,
+  initialState,
   reducers: {
-    userLoggedIn: (state, { payload }: { payload: IAuth }) => {
-      state.accessToken = payload.accessToken;
+    userLoggedIn: (state, { payload }: PayloadAction<{ user: IUser }>) => {
       state.user = payload.user;
-      Cookies.set("admin",JSON.stringify({
-          accessToken: payload.accessToken,
-          user: payload.user
-        }),
-        { expires: 0.5 }
-      );
+      state.authenticated = true;
     },
     userLoggedOut: (state) => {
-      state.accessToken = undefined;
       state.user = undefined;
-      Cookies.remove("admin");
+      state.authenticated = false;
     },
   },
 });

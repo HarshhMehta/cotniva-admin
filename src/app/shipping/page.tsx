@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import Wrapper from "@/layout/wrapper";
 import { notifyError, notifySuccess } from "@/utils/toast";
+import { adminFetchInit } from "@/utils/admin-auth-headers";
 
 export default function ShippingSettingsPage() {
   const [deliveryCharge, setDeliveryCharge] = useState(100);
@@ -26,14 +27,14 @@ export default function ShippingSettingsPage() {
     try {
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/store-settings/update`,
-        {
+        adminFetchInit({
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             deliveryCharge: Number(deliveryCharge),
             freeShippingAbove: Number(freeShippingAbove),
           }),
-        }
+        })
       );
       const data = await res.json();
       if (data.success) notifySuccess("Shipping settings saved!");
