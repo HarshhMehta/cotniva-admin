@@ -19,6 +19,9 @@ const CouponEditArea = ({ id }: { id: string }) => {
     setOpenSidebar,
     neverExpires,
     setNeverExpires,
+    discountType,
+    setDiscountType,
+    handleGenerateCode,
     selectedCategories,
     setSelectedCategories,
     handleSubmitEditCoupon,
@@ -30,9 +33,26 @@ const CouponEditArea = ({ id }: { id: string }) => {
   useEffect(() => {
     if (!coupon) return;
     setNeverExpires(Boolean(coupon.neverExpires));
+    const type =
+      String(coupon.discountType || "percentage").toLowerCase() === "fixed"
+        ? "fixed"
+        : "percentage";
+    setDiscountType(type);
     if (coupon.endTime && !coupon.neverExpires) {
       setValue("endtime", dayjs(coupon.endTime).format("YYYY-MM-DD"));
     }
+    const discountVal =
+      type === "fixed"
+        ? coupon.discountAmount ?? coupon.discountPercentage
+        : coupon.discountPercentage;
+    setValue("discountvalue", discountVal);
+    setValue("minimumamount", coupon.minimumAmount ?? 0);
+    setValue(
+      "maxuses",
+      coupon.maxUses != null && Number(coupon.maxUses) > 0
+        ? coupon.maxUses
+        : ""
+    );
     const cats = Array.isArray(coupon.applicableCategories)
       ? coupon.applicableCategories
       : [];
@@ -46,7 +66,13 @@ const CouponEditArea = ({ id }: { id: string }) => {
     } else {
       setSelectedCategories([ALL_OPTION]);
     }
-  }, [coupon, setNeverExpires, setSelectedCategories, setValue]);
+  }, [
+    coupon,
+    setNeverExpires,
+    setDiscountType,
+    setSelectedCategories,
+    setValue,
+  ]);
 
   let content = null;
   if (isLoading) {
@@ -66,7 +92,7 @@ const CouponEditArea = ({ id }: { id: string }) => {
               Edit Coupon
             </h3>
             <p className="text-xs text-[#888] mb-5">
-              Update discount settings and category scope
+              Update discount settings (amounts in ₹)
             </p>
 
             <CouponFormField
@@ -76,18 +102,110 @@ const CouponEditArea = ({ id }: { id: string }) => {
               isReq={true}
               default_val={coupon.title}
             />
-            <CouponFormField
-              register={register}
-              errors={errors}
-              name="Code"
-              isReq={true}
-              default_val={coupon.couponCode}
-            />
+
+            <div className="mb-5">
+              <p className="mb-0 text-sm font-medium text-[#1f1f1f]">
+                Coupon Code <span className="text-danger">*</span>
+              </p>
+              <div className="flex gap-2 mt-1">
+                <input
+                  {...register("code", { required: "Coupon code is required!" })}
+                  className="input w-full h-[44px] rounded-md border border-gray6 px-4 text-base uppercase"
+                  type="text"
+                  defaultValue={coupon.couponCode}
+                />
+                <button
+                  type="button"
+                  onClick={handleGenerateCode}
+                  className="shrink-0 h-[44px] px-4 rounded-md border border-gray6 text-sm font-medium text-[#4a1f1a]"
+                >
+                  Generate
+                </button>
+              </div>
+            </div>
+
+            <div className="mb-5">
+              <p className="mb-0 text-sm font-medium text-[#1f1f1f]">
+                Discount Type
+              </p>
+              <select
+                value={discountType}
+                onChange={(e) =>
+                  setDiscountType(
+                    e.target.value === "fixed" ? "fixed" : "percentage"
+                  )
+                }
+                className="input w-full h-[44px] rounded-md border border-gray6 px-4 text-base mt-1"
+              >
+                <option value="percentage">Percentage (%)</option>
+                <option value="fixed">Fixed amount (₹)</option>
+              </select>
+            </div>
+
+            <div className="mb-5">
+              <p className="mb-0 text-sm font-medium text-[#1f1f1f]">
+                Discount Value
+              </p>
+              <input
+                {...register("discountvalue", {
+                  required: "Discount value is required!",
+                })}
+                className="input w-full h-[44px] rounded-md border border-gray6 px-4 text-base mt-1"
+                type="text"
+                inputMode="decimal"
+                defaultValue={
+                  String(coupon.discountType || "").toLowerCase() === "fixed"
+                    ? coupon.discountAmount ?? coupon.discountPercentage
+                    : coupon.discountPercentage
+                }
+              />
+              <p className="mb-0 mt-1 text-xs text-[#888]">
+                {discountType === "fixed"
+                  ? "Enter ₹ amount"
+                  : "Enter % off"}
+              </p>
+            </div>
+
+            <div className="mb-5">
+              <p className="mb-0 text-sm font-medium text-[#1f1f1f]">
+                Min Order Amount (₹)
+              </p>
+              <input
+                {...register("minimumamount")}
+                className="input w-full h-[44px] rounded-md border border-gray6 px-4 text-base mt-1"
+                type="text"
+                inputMode="decimal"
+                defaultValue={coupon.minimumAmount}
+              />
+            </div>
+
+            <div className="mb-5">
+              <p className="mb-0 text-sm font-medium text-[#1f1f1f]">Max Uses</p>
+              <input
+                {...register("maxuses")}
+                className="input w-full h-[44px] rounded-md border border-gray6 px-4 text-base mt-1"
+                type="number"
+                min={1}
+                step={1}
+                placeholder="Leave blank = unlimited"
+                defaultValue={
+                  coupon.maxUses != null && Number(coupon.maxUses) > 0
+                    ? coupon.maxUses
+                    : undefined
+                }
+              />
+              <p className="mb-0 mt-1 text-xs text-[#888]">
+                Used {Number(coupon.usedCount) || 0}
+                {coupon.maxUses != null && Number(coupon.maxUses) > 0
+                  ? ` / ${coupon.maxUses}`
+                  : " (unlimited)"}
+              </p>
+            </div>
 
             <div className="mb-5">
               <div className="flex items-center justify-between mb-1.5">
                 <p className="mb-0 text-sm font-medium text-[#1f1f1f]">
-                  End date
+                  Expires At
                 </p>
                 <label className="inline-flex items-center gap-2 cursor-pointer select-none">
                   <input
@@ -119,39 +237,6 @@ const CouponEditArea = ({ id }: { id: string }) => {
                   This coupon will not expire
                 </div>
               )}
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div className="mb-5">
-                <p className="mb-0 text-sm font-medium text-[#1f1f1f]">
-                  Discount %
-                </p>
-                <input
-                  {...register("discountpercentage", {
-                    required: "Discount percentage is required!",
-                  })}
-                  className="input w-full h-[44px] rounded-md border border-gray6 px-4 text-base"
-                  type="text"
-                  inputMode="decimal"
-                  placeholder="e.g. 10"
-                  defaultValue={coupon.discountPercentage}
-                />
-              </div>
-              <div className="mb-5">
-                <p className="mb-0 text-sm font-medium text-[#1f1f1f]">
-                  Minimum amount
-                </p>
-                <input
-                  {...register("minimumamount", {
-                    required: "Minimum amount is required!",
-                  })}
-                  className="input w-full h-[44px] rounded-md border border-gray6 px-4 text-base"
-                  type="text"
-                  inputMode="decimal"
-                  placeholder="e.g. 500"
-                  defaultValue={coupon.minimumAmount}
-                />
-              </div>
             </div>
 
             <CouponCategorySelect

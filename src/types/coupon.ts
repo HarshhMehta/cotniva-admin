@@ -6,8 +6,12 @@ export interface ICoupon {
   couponCode: string;
   endTime?: string | null;
   neverExpires?: boolean;
+  discountType?: "percentage" | "fixed";
   discountPercentage: number;
+  discountAmount?: number;
   minimumAmount: number;
+  maxUses?: number | null;
+  usedCount?: number;
   productType: string;
   applicableCategories?: Array<string | { _id: string; parent?: string }>;
   startTime: string;
@@ -23,8 +27,12 @@ export interface IAddCoupon {
   couponCode: string;
   endTime?: string | null;
   neverExpires?: boolean;
+  discountType?: "percentage" | "fixed";
   discountPercentage: number;
+  discountAmount?: number;
+  discountValue?: number;
   minimumAmount: number;
+  maxUses?: number | null;
   productType?: string;
   applicableCategories?: string[];
   startTime?: string;
