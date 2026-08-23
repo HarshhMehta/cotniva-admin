@@ -16,6 +16,9 @@ const CouponArea = () => {
     control,
     neverExpires,
     setNeverExpires,
+    discountType,
+    setDiscountType,
+    handleGenerateCode,
     selectedCategories,
     setSelectedCategories,
   } = useCouponSubmit();
@@ -88,6 +91,9 @@ const CouponArea = () => {
           control,
           neverExpires,
           setNeverExpires,
+          discountType,
+          setDiscountType,
+          handleGenerateCode,
           selectedCategories,
           setSelectedCategories,
         }}

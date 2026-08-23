@@ -66,7 +66,8 @@ const CouponTable = ({cls,setOpenSidebar,selectValue,searchValue}: IPropType) =>
                 Name
               </th>
               <TableHead title="Code" />
-              <TableHead title="Amount" />
+              <TableHead title="Discount" />
+              <TableHead title="Uses" />
               <TableHead title="Status" />
               <TableHead title="Start" />
               <TableHead title="End" />
@@ -95,22 +96,39 @@ const CouponTable = ({cls,setOpenSidebar,selectValue,searchValue}: IPropType) =>
                     </span>
                   </td>
                   <td className="px-3 py-3 font-normal text-[#55585B] text-end">
-                    {coupon.discountPercentage}%
+                    {String(coupon.discountType || "").toLowerCase() === "fixed"
+                      ? `₹${Number(coupon.discountAmount || coupon.discountPercentage || 0)}`
+                      : `${coupon.discountPercentage}%`}
+                  </td>
+                  <td className="px-3 py-3 font-normal text-[#55585B] text-end">
+                    {Number(coupon.usedCount) || 0}
+                    {coupon.maxUses != null && Number(coupon.maxUses) > 0
+                      ? ` / ${coupon.maxUses}`
+                      : " / ∞"}
                   </td>
                   <td className="px-3 py-3 font-normal text-[#55585B] text-end">
                     <span
                       className={`text-[11px] px-3 py-1 rounded-md leading-none font-medium text-end ${
-                        !coupon.neverExpires &&
-                        coupon.endTime &&
-                        dayjs().isAfter(dayjs(coupon.endTime))
+                        (!coupon.neverExpires &&
+                          coupon.endTime &&
+                          dayjs().isAfter(dayjs(coupon.endTime))) ||
+                        (coupon.maxUses != null &&
+                          Number(coupon.maxUses) > 0 &&
+                          Number(coupon.usedCount || 0) >= Number(coupon.maxUses))
                           ? "text-danger bg-danger/10"
                           : "text-success bg-success/10"
                       }`}
                     >
-                      {!coupon.neverExpires &&
-                      coupon.endTime &&
-                      dayjs().isAfter(dayjs(coupon.endTime))
-                        ? "Expired"
+                      {(!coupon.neverExpires &&
+                        coupon.endTime &&
+                        dayjs().isAfter(dayjs(coupon.endTime))) ||
+                      (coupon.maxUses != null &&
+                        Number(coupon.maxUses) > 0 &&
+                        Number(coupon.usedCount || 0) >= Number(coupon.maxUses))
+                        ? coupon.maxUses != null &&
+                          Number(coupon.usedCount || 0) >= Number(coupon.maxUses)
+                          ? "Maxed"
+                          : "Expired"
                         : "Active"}
                     </span>
                   </td>
