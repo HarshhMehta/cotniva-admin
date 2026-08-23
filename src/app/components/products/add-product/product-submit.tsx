@@ -315,7 +315,6 @@ export default function ProductForm({ productEdit }: IProps) {
     setIsSubmitting(true);
 
     try {
-      const apiBase = adminApiUrl("");
       const isEdit = Boolean(productEdit && productEdit._id);
 
       const imageURLs = await Promise.all(
@@ -326,7 +325,7 @@ export default function ProductForm({ productEdit }: IProps) {
           if (variant.img instanceof File) {
             const uploadData = new FormData();
             uploadData.append("image", variant.img);
-            const uploadRes = await fetch(`${apiBase}/api/cloudinary/add-img`, {
+            const uploadRes = await fetch(adminApiUrl("/api/cloudinary/add-img"), {
               method: "POST",
               body: uploadData,
               credentials: "include",
@@ -420,8 +419,8 @@ export default function ProductForm({ productEdit }: IProps) {
       }
 
       const productUrl = isEdit
-        ? `${apiBase}/api/product/edit-product/${productEdit._id}`
-        : `${apiBase}/api/product/add`;
+        ? adminApiUrl(`/api/product/edit-product/${productEdit._id}`)
+        : adminApiUrl("/api/product/add");
 
       const response = await fetch(
         productUrl,
