@@ -53,6 +53,12 @@ const CouponEditArea = ({ id }: { id: string }) => {
         ? coupon.maxUses
         : ""
     );
+    setValue(
+      "maxusesperuser",
+      coupon.maxUsesPerUser != null && Number(coupon.maxUsesPerUser) > 0
+        ? coupon.maxUsesPerUser
+        : ""
+    );
     const cats = Array.isArray(coupon.applicableCategories)
       ? coupon.applicableCategories
       : [];
@@ -180,7 +186,31 @@ const CouponEditArea = ({ id }: { id: string }) => {
             </div>
 
             <div className="mb-5">
-              <p className="mb-0 text-sm font-medium text-[#1f1f1f]">Max Uses</p>
+              <p className="mb-0 text-sm font-medium text-[#1f1f1f]">
+                Per Customer Limit
+              </p>
+              <input
+                {...register("maxusesperuser")}
+                className="input w-full h-[44px] rounded-md border border-gray6 px-4 text-base mt-1"
+                type="number"
+                min={1}
+                step={1}
+                placeholder="e.g. 1"
+                defaultValue={
+                  coupon.maxUsesPerUser != null && Number(coupon.maxUsesPerUser) > 0
+                    ? coupon.maxUsesPerUser
+                    : undefined
+                }
+              />
+              <p className="mb-0 mt-1 text-xs text-[#888]">
+                Har customer kitni baar (1 = welcome / first order only)
+              </p>
+            </div>
+
+            <div className="mb-5">
+              <p className="mb-0 text-sm font-medium text-[#1f1f1f]">
+                Max Total Uses (all customers)
+              </p>
               <input
                 {...register("maxuses")}
                 className="input w-full h-[44px] rounded-md border border-gray6 px-4 text-base mt-1"
@@ -197,8 +227,11 @@ const CouponEditArea = ({ id }: { id: string }) => {
               <p className="mb-0 mt-1 text-xs text-[#888]">
                 Used {Number(coupon.usedCount) || 0}
                 {coupon.maxUses != null && Number(coupon.maxUses) > 0
-                  ? ` / ${coupon.maxUses}`
-                  : " (unlimited)"}
+                  ? ` / ${coupon.maxUses} total`
+                  : " (unlimited total)"}
+                {coupon.maxUsesPerUser != null && Number(coupon.maxUsesPerUser) > 0
+                  ? ` · ${coupon.maxUsesPerUser} per customer`
+                  : ""}
               </p>
             </div>
 

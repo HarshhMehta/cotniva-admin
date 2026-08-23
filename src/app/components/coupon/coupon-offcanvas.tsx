@@ -175,7 +175,26 @@ const CouponOffcanvas = ({ propsItems }: IPropType) => {
             </div>
 
             <div className="mb-5">
-              <p className="mb-0 text-sm font-medium text-[#1f1f1f]">Max Uses</p>
+              <p className="mb-0 text-sm font-medium text-[#1f1f1f]">
+                Per Customer Limit
+              </p>
+              <input
+                {...register("maxusesperuser")}
+                className="input w-full h-[44px] rounded-md border border-gray6 px-4 text-base mt-1"
+                type="number"
+                min={1}
+                step={1}
+                placeholder="e.g. 1 for welcome / first order"
+              />
+              <p className="mb-0 mt-1 text-xs text-[#888]">
+                Har customer kitni baar use kar sakta hai (e.g. 1 = sirf ek baar)
+              </p>
+            </div>
+
+            <div className="mb-5">
+              <p className="mb-0 text-sm font-medium text-[#1f1f1f]">
+                Max Total Uses (all customers)
+              </p>
               <input
                 {...register("maxuses")}
                 className="input w-full h-[44px] rounded-md border border-gray6 px-4 text-base mt-1"
@@ -185,7 +204,7 @@ const CouponOffcanvas = ({ propsItems }: IPropType) => {
                 placeholder="Leave blank = unlimited"
               />
               <p className="mb-0 mt-1 text-xs text-[#888]">
-                How many times this code can be used in total
+                Puri site par total kitni baar — sab customers mila ke
               </p>
             </div>
 
