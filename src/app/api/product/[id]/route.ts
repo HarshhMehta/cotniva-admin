@@ -1,6 +1,34 @@
 import { NextRequest, NextResponse } from "next/server";
 import { deleteImageFromCloudinary, uploadImageToCloudinary } from "@/utils/cloudinaryUpload";
+import { proxyToBackend } from "@/utils/proxy-to-backend";
 
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
+/**
+ * GET /api/product/all | stock-out | single-product/:id etc.
+ * These paths are shadowed by this dynamic [id] segment — proxy to backend.
+ */
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  return proxyToBackend(request, `product/${params.id}`);
+}
+
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  return proxyToBackend(request, `product/${params.id}`);
+}
+
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  return proxyToBackend(request, `product/${params.id}`);
+}
 
 /**
  * PUT /api/products/[id]
@@ -226,10 +254,16 @@ export async function PUT(
   }
 }
 
-/** Vercel 404s PUT+multipart on dynamic routes; POST works. */
+/** Vercel 404s PUT+multipart on dynamic routes; POST works for form uploads.
+ * JSON/API POSTs (e.g. /api/product/add) must proxy to the real backend.
+ */
 export async function POST(
   request: NextRequest,
   context: { params: { id: string } }
 ) {
-  return PUT(request, context);
+  const contentType = request.headers.get("content-type") || "";
+  if (contentType.includes("multipart/form-data")) {
+    return PUT(request, context);
+  }
+  return proxyToBackend(request, `product/${context.params.id}`);
 }
