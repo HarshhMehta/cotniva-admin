@@ -23,7 +23,9 @@ export function getAdminApiBase(): string {
 
 /** Build `/api/...` URL for fetch (relative in browser). */
 export function adminApiUrl(path: string): string {
-  const normalized = path.startsWith("/") ? path : `/${path}`;
+  const trimmed = String(path || "").trim();
+  if (!trimmed || trimmed === "/") return "";
+  const normalized = trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
   const base = getAdminApiBase();
   return base ? `${base}${normalized}` : normalized;
 }
