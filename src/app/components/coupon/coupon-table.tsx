@@ -105,6 +105,12 @@ const CouponTable = ({cls,setOpenSidebar,selectValue,searchValue}: IPropType) =>
                     {coupon.maxUses != null && Number(coupon.maxUses) > 0
                       ? ` / ${coupon.maxUses}`
                       : " / ∞"}
+                    {coupon.maxUsesPerUser != null &&
+                    Number(coupon.maxUsesPerUser) > 0 ? (
+                      <span className="block text-[11px] text-[#888]">
+                        {coupon.maxUsesPerUser} per customer
+                      </span>
+                    ) : null}
                   </td>
                   <td className="px-3 py-3 font-normal text-[#55585B] text-end">
                     <span

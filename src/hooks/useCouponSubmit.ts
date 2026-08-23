@@ -86,6 +86,16 @@ const useCouponSubmit = () => {
       if (Number.isFinite(n) && n > 0) maxUses = Math.floor(n);
     }
 
+    let maxUsesPerUser: number | null = null;
+    if (
+      data?.maxusesperuser !== undefined &&
+      data?.maxusesperuser !== null &&
+      String(data.maxusesperuser).trim() !== ""
+    ) {
+      const n = parseNumberInput(data.maxusesperuser);
+      if (Number.isFinite(n) && n > 0) maxUsesPerUser = Math.floor(n);
+    }
+
     return {
       logo: "",
       title: data?.name,
@@ -102,6 +112,7 @@ const useCouponSubmit = () => {
       discountAmount: discountType === "fixed" ? discountValue : 0,
       minimumAmount: parseNumberInput(data?.minimumamount) || 0,
       maxUses,
+      maxUsesPerUser,
       productType: "all",
       applicableCategories: isAll ? [] : cats.map((c) => c.value),
     };

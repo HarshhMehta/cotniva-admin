@@ -11,6 +11,7 @@ export interface ICoupon {
   discountAmount?: number;
   minimumAmount: number;
   maxUses?: number | null;
+  maxUsesPerUser?: number | null;
   usedCount?: number;
   productType: string;
   applicableCategories?: Array<string | { _id: string; parent?: string }>;
@@ -33,6 +34,7 @@ export interface IAddCoupon {
   discountValue?: number;
   minimumAmount: number;
   maxUses?: number | null;
+  maxUsesPerUser?: number | null;
   productType?: string;
   applicableCategories?: string[];
   startTime?: string;
