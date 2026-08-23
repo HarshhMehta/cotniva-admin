@@ -174,12 +174,19 @@ export async function PUT(
     }
 
     // Send to external server
+    const apiBase = (
+      process.env.BACKEND_URL ||
+      process.env.NEXT_PUBLIC_API_BASE_URL ||
+      ""
+    ).replace(/\/$/, "");
     const authHeader = request.headers.get("authorization") || "";
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/product/edit-product/${productId}`, {
-      method: "PATCH",
+    const cookieHeader = request.headers.get("cookie") || "";
+    const response = await fetch(`${apiBase}/api/product/edit-product/${productId}`, {
+      method: "POST",
       headers: {
         "Content-Type": "application/json",
         ...(authHeader ? { Authorization: authHeader } : {}),
+        ...(cookieHeader ? { Cookie: cookieHeader } : {}),
       },
       body: JSON.stringify(productPayload),
     });

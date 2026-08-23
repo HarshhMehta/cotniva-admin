@@ -66,7 +66,7 @@ export const notificationApi = apiSlice.injectEndpoints({
     >({
       query: (id) => ({
         url: `/api/notifications/${id}/read`,
-        method: "PATCH",
+        method: "POST",
       }),
       invalidatesTags: ["Notifications", "NotificationCount"],
     }),
@@ -76,7 +76,7 @@ export const notificationApi = apiSlice.injectEndpoints({
     >({
       query: () => ({
         url: `/api/notifications/read-all`,
-        method: "PATCH",
+        method: "POST",
       }),
       invalidatesTags: ["Notifications", "NotificationCount"],
     }),

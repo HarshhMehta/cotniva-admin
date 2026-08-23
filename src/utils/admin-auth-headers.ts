@@ -1,7 +1,11 @@
-export const API_BASE =
-  String(process.env.NEXT_PUBLIC_API_BASE_URL || "").replace(/\/$/, "");
+import { getAdminApiBase, adminApiUrl } from "@/utils/api-base";
 
-/** Browser requests to the Cotniva API with HttpOnly admin session cookies */
+export { getAdminApiBase, adminApiUrl };
+
+/** @deprecated Use adminApiUrl('/api/...') — kept for existing imports */
+export const API_BASE = getAdminApiBase();
+
+/** Browser requests with HttpOnly admin session cookies (same-origin proxy) */
 export function adminFetchInit(
   init: RequestInit = {}
 ): RequestInit & { credentials: "include" } {

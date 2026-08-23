@@ -8,7 +8,7 @@ import {
   IAdminUpdate,
   IStuff,
 } from "@/types/admin-type";
-import { API_BASE } from "@/utils/admin-auth-headers";
+import { adminApiUrl } from "@/utils/api-base";
 
 type AdminSessionUser = {
   _id: string;
@@ -179,7 +179,7 @@ export const {
 
 export async function refreshAdminSession(): Promise<boolean> {
   try {
-    const res = await fetch(`${API_BASE}/api/admin/refresh`, {
+    const res = await fetch(adminApiUrl("/api/admin/refresh"), {
       method: "POST",
       credentials: "include",
       headers: { "Content-Type": "application/json" },

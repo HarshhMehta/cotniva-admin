@@ -4,6 +4,7 @@ import Wrapper from "@/layout/wrapper";
 import GlobalImgUpload from "@/app/components/category/global-img-upload";
 import { notifyError, notifySuccess } from "@/utils/toast";
 import { adminFetchInit } from "@/utils/admin-auth-headers";
+import { adminApiUrl } from "@/utils/api-base";
 
 const DEFAULTS = {
   isActive: true,
@@ -25,7 +26,7 @@ export default function WelcomePopupPage() {
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/welcome-popup`)
+    fetch(adminApiUrl("/api/welcome-popup"))
       .then((res) => res.json())
       .then((data) => {
         if (data.success && data.data) {
@@ -58,9 +59,9 @@ export default function WelcomePopupPage() {
     setSaving(true);
     try {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/welcome-popup/update`,
+        adminApiUrl("/api/welcome-popup/update"),
         adminFetchInit({
-          method: "PATCH",
+          method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             ...form,

@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from "react";
 import { RootState } from "./../redux/store";
 import { useDispatch, useSelector } from "react-redux";
 import { userLoggedIn, userLoggedOut } from "@/redux/auth/authSlice";
-import { API_BASE } from "@/utils/admin-auth-headers";
+import { adminApiUrl } from "@/utils/api-base";
 import { refreshAdminSession } from "@/redux/auth/authApi";
 
 export default function useAuthCheck() {
@@ -15,13 +15,13 @@ export default function useAuthCheck() {
 
   const verifySession = useCallback(async () => {
     try {
-      let res = await fetch(`${API_BASE}/api/admin/me`, {
+      let res = await fetch(adminApiUrl("/api/admin/me"), {
         credentials: "include",
       });
       if (res.status === 401) {
         const refreshed = await refreshAdminSession();
         if (refreshed) {
-          res = await fetch(`${API_BASE}/api/admin/me`, {
+          res = await fetch(adminApiUrl("/api/admin/me"), {
             credentials: "include",
           });
         }

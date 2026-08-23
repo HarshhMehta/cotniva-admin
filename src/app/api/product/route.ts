@@ -160,18 +160,24 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL;
+    const apiBase = (
+      process.env.BACKEND_URL ||
+      process.env.NEXT_PUBLIC_API_BASE_URL ||
+      ""
+    ).replace(/\/$/, "");
     const isEdit = Boolean(productId);
     const authHeader = request.headers.get("authorization") || "";
+    const cookieHeader = request.headers.get("cookie") || "";
     const response = await fetch(
       isEdit
         ? `${apiBase}/api/product/edit-product/${productId}`
         : `${apiBase}/api/product/add`,
       {
-        method: isEdit ? "PATCH" : "POST",
+        method: isEdit ? "POST" : "POST",
         headers: {
           "Content-Type": "application/json",
           ...(authHeader ? { Authorization: authHeader } : {}),
+          ...(cookieHeader ? { Cookie: cookieHeader } : {}),
         },
         body: JSON.stringify(productPayload),
       }
