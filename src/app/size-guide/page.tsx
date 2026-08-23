@@ -4,8 +4,9 @@ import Wrapper from "@/layout/wrapper";
 import { notifyError, notifySuccess } from "@/utils/toast";
 import GalleryMediaUpload from "../components/gallery/gallery-media-upload";
 import { adminFetchInit } from "@/utils/admin-auth-headers";
+import { adminApiUrl } from "@/utils/api-base";
 
-const API = () => `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/size-guide`;
+const API = () => adminApiUrl("/api/size-guide");
 
 type SizeGuideRow = { label: string; values: string[] };
 type HowToMeasure = { label: string; text: string };

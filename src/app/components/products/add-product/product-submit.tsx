@@ -4,7 +4,8 @@
 import { AdditionalInfo, ProductFormData, Variant } from "@/types/product-type";
 import { useState, useEffect, useMemo } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
-import { adminFetchInit, API_BASE } from "@/utils/admin-auth-headers";
+import { adminFetchInit } from "@/utils/admin-auth-headers";
+import { adminApiUrl } from "@/utils/api-base";
 import VariantModal from "./variant-product-modal";
 import Breadcrumb from "../../breadcrumb/breadcrumb";
 import ProductCategory from "../../category/product-category";
@@ -79,7 +80,7 @@ export default function ProductForm({ productEdit }: IProps) {
   const SIZE_OPTIONS = ["XS", "S", "M", "L", "XL", "XXL"];
 
   useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/size-guide/show`)
+    fetch(adminApiUrl("/api/size-guide/show"))
       .then((res) => res.json())
       .then((data) => {
         if (data.success) setSizeGuides(data.data || []);
@@ -314,7 +315,7 @@ export default function ProductForm({ productEdit }: IProps) {
     setIsSubmitting(true);
 
     try {
-      const apiBase = API_BASE;
+      const apiBase = adminApiUrl("");
       const isEdit = Boolean(productEdit && productEdit._id);
 
       const imageURLs = await Promise.all(

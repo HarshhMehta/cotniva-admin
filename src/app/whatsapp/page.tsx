@@ -3,8 +3,9 @@ import React, { useEffect, useState, useCallback, useRef } from "react";
 import Wrapper from "@/layout/wrapper";
 import { notifyError, notifySuccess } from "@/utils/toast";
 import { adminFetchInit } from "@/utils/admin-auth-headers";
+import { adminApiUrl } from "@/utils/api-base";
 
-const API = process.env.NEXT_PUBLIC_API_BASE_URL;
+const api = (path: string) => adminApiUrl(`/api/whatsapp${path}`);
 
 export default function WhatsAppPage() {
   const [status, setStatus] = useState("disconnected");
@@ -17,7 +18,7 @@ export default function WhatsAppPage() {
 
   const fetchStatus = useCallback(async () => {
     try {
-      const res = await fetch(`${API}/api/whatsapp/status`, adminFetchInit());
+      const res = await fetch(api("/status"), adminFetchInit());
       const data = await res.json();
       if (data.success) {
         setStatus(data.data.status);
@@ -36,7 +37,7 @@ export default function WhatsAppPage() {
     setBusy(true);
     setLoading(true);
     try {
-      const res = await fetch(`${API}/api/whatsapp/connect`, adminFetchInit({ method: "POST" }));
+      const res = await fetch(api("/connect"), adminFetchInit({ method: "POST" }));
       const data = await res.json();
       if (data.success) {
         setStatus(data.data.status);
@@ -80,7 +81,7 @@ export default function WhatsAppPage() {
   const handleLogout = async () => {
     setBusy(true);
     try {
-      const res = await fetch(`${API}/api/whatsapp/logout`, adminFetchInit({ method: "POST" }));
+      const res = await fetch(api("/logout"), adminFetchInit({ method: "POST" }));
       const data = await res.json();
       if (data.success) {
         notifySuccess(data.message || "Disconnected");

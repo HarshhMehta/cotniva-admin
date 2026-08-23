@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import Wrapper from "@/layout/wrapper";
 import { notifyError, notifySuccess } from "@/utils/toast";
 import { adminFetchInit } from "@/utils/admin-auth-headers";
+import { adminApiUrl } from "@/utils/api-base";
 
 export default function ShippingSettingsPage() {
   const [deliveryCharge, setDeliveryCharge] = useState(100);
@@ -11,7 +12,7 @@ export default function ShippingSettingsPage() {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/store-settings`)
+    fetch(adminApiUrl("/api/store-settings"))
       .then((res) => res.json())
       .then((data) => {
         if (data.success) {
@@ -26,7 +27,7 @@ export default function ShippingSettingsPage() {
     setSaving(true);
     try {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/store-settings/update`,
+        adminApiUrl("/api/store-settings/update"),
         adminFetchInit({
           method: "PATCH",
           headers: { "Content-Type": "application/json" },

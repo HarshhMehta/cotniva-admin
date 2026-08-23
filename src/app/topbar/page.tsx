@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import Wrapper from "@/layout/wrapper";
 import { notifyError, notifySuccess } from "@/utils/toast";
 import { adminFetchInit } from "@/utils/admin-auth-headers";
+import { adminApiUrl } from "@/utils/api-base";
 
 const EMPTY_SLOTS = ["", "", ""];
 const MAX = 3;
@@ -31,7 +32,7 @@ export default function TopBarPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/topbar`)
+    fetch(adminApiUrl("/api/topbar"))
       .then((res) => res.json())
       .then((data) => {
         if (data.success) {
@@ -66,7 +67,7 @@ export default function TopBarPage() {
     }
     try {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/topbar/update`,
+        adminApiUrl("/api/topbar/update"),
         adminFetchInit({
           method: "PATCH",
           headers: { "Content-Type": "application/json" },

@@ -1,9 +1,7 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import dayjs from 'dayjs';
-
-const API = () =>
-  String(process.env.NEXT_PUBLIC_API_BASE_URL || '').replace(/\/$/, '');
+import { adminApiUrl } from '@/utils/api-base';
 
 type AbandonItem = {
   _id: string;
@@ -31,7 +29,7 @@ const CheckoutFeedbackArea = () => {
     (async () => {
       try {
         setLoading(true);
-        const res = await fetch(`${API()}/api/checkout-abandon?limit=50`, {
+        const res = await fetch(adminApiUrl('/api/checkout-abandon?limit=50'), {
           credentials: 'include',
         });
         const data = await res.json();
