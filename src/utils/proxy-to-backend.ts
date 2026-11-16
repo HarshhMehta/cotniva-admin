@@ -45,6 +45,26 @@ function rewriteSetCookie(raw: string) {
   return c;
 }
 
+/** Only auth cookies are needed upstream. Extra Vercel/browser cookies make the
+ * Cookie header too large and LiteSpeed drops the connection (~10s → fetch failed). */
+const FORWARD_COOKIE_NAMES = new Set([
+  "cotniva_admin_access",
+  "cotniva_admin_refresh",
+]);
+
+function filterUpstreamCookie(raw: string | null): string {
+  if (!raw) return "";
+  return raw
+    .split(";")
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .filter((part) => {
+      const name = part.split("=", 1)[0]?.trim();
+      return Boolean(name && FORWARD_COOKIE_NAMES.has(name));
+    })
+    .join("; ");
+}
+
 /** @param apiPath path after /api/ e.g. "product/all" */
 export async function proxyToBackend(
   req: NextRequest,
@@ -72,7 +92,6 @@ export async function proxyToBackend(
     "accept-language",
     "authorization",
     "content-type",
-    "cookie",
     "x-device-id",
     "x-requested-with",
   ];
@@ -80,6 +99,9 @@ export async function proxyToBackend(
     const v = req.headers.get(key);
     if (v) headers.set(key, v);
   }
+
+  const cookie = filterUpstreamCookie(req.headers.get("cookie"));
+  if (cookie) headers.set("cookie", cookie);
 
   const adminHost = req.headers.get("host") || "";
   headers.set("x-forwarded-host", adminHost);
@@ -115,11 +137,21 @@ export async function proxyToBackend(
   try {
     upstream = await fetch(target, init);
   } catch (err) {
-    const message = err instanceof Error ? err.message : "error";
-    return NextResponse.json(
-      { success: false, message: `Upstream API unreachable: ${message}` },
-      { status: 502 }
-    );
+    // One quick retry — LiteSpeed occasionally drops the first connection.
+    try {
+      upstream = await fetch(target, init);
+    } catch (retryErr) {
+      const message =
+        retryErr instanceof Error
+          ? retryErr.message
+          : err instanceof Error
+            ? err.message
+            : "error";
+      return NextResponse.json(
+        { success: false, message: `Upstream API unreachable: ${message}` },
+        { status: 502 }
+      );
+    }
   }
 
   const outHeaders = new Headers();
