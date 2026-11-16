@@ -25,6 +25,10 @@ export function backendOrigin(): string {
     return publicBase;
   }
 
+  if (process.env.VERCEL || process.env.NODE_ENV === "production") {
+    return "https://backend.cotniva.com";
+  }
+
   return "http://127.0.0.1:7001";
 }
 

@@ -144,6 +144,12 @@ const sidebar_menu: Array<ISidebarMenus> = [
     link: "/whatsapp",
     title: "WhatsApp OTP",
   },
+  {
+    id: 21,
+    icon: Setting,
+    link: "/instagram",
+    title: "Instagram",
+  },
 ];
 
 export default sidebar_menu;
